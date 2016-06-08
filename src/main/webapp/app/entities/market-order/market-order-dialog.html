@@ -1,0 +1,172 @@
+
+<form name="editForm" role="form" novalidate ng-submit="vm.save()" show-validation>
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                ng-click="vm.clear()">&times;</button>
+        <h4 class="modal-title" id="myMarketOrderLabel">Create or edit a MarketOrder</h4>
+    </div>
+    <div class="modal-body">
+        <jhi-alert-error></jhi-alert-error>
+        <div class="form-group">
+            <label for="id">ID</label>
+            <input type="text" class="form-control" id="id" name="id"
+                    ng-model="vm.marketOrder.id" readonly />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_buy">Buy</label>
+            <input type="checkbox" class="form-control" name="buy" id="field_buy"
+                    ng-model="vm.marketOrder.buy"
+                     />
+            <div ng-show="editForm.buy.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.buy.$error.required">
+                    This field is required.
+                </p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_issued">Issued</label>
+                <div class="input-group">
+                    <input id="field_issued" type="text" class="form-control" name="issued" datetime-picker="{{dateformat}}" ng-model="vm.marketOrder.issued" is-open="vm.datePickerOpenStatus.issued"
+                    required  />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="vm.openCalendar('issued')"><i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </div>
+            <div ng-show="editForm.issued.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.issued.$error.required">
+                    This field is required.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.issued.$error.ZonedDateTimelocal">
+                    This field should be a date and time.
+                </p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_price">Price</label>
+            <input type="number" class="form-control" name="price" id="field_price"
+                    ng-model="vm.marketOrder.price"
+                    required />
+            <div ng-show="editForm.price.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.price.$error.required">
+                    This field is required.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.price.$error.number">
+                    This field should be a number.
+                </p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_volumeEntered">VolumeEntered</label>
+            <input type="number" class="form-control" name="volumeEntered" id="field_volumeEntered"
+                    ng-model="vm.marketOrder.volumeEntered"
+                    required />
+            <div ng-show="editForm.volumeEntered.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.volumeEntered.$error.required">
+                    This field is required.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.volumeEntered.$error.number">
+                    This field should be a number.
+                </p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_stationID">StationID</label>
+            <input type="number" class="form-control" name="stationID" id="field_stationID"
+                    ng-model="vm.marketOrder.stationID"
+                    required />
+            <div ng-show="editForm.stationID.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.stationID.$error.required">
+                    This field is required.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.stationID.$error.number">
+                    This field should be a number.
+                </p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_volume">Volume</label>
+            <input type="number" class="form-control" name="volume" id="field_volume"
+                    ng-model="vm.marketOrder.volume"
+                    required />
+            <div ng-show="editForm.volume.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.volume.$error.required">
+                    This field is required.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.volume.$error.number">
+                    This field should be a number.
+                </p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_range">Range</label>
+            <input type="text" class="form-control" name="range" id="field_range"
+                    ng-model="vm.marketOrder.range"
+                    required />
+            <div ng-show="editForm.range.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.range.$error.required">
+                    This field is required.
+                </p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_minVolume">MinVolume</label>
+            <input type="number" class="form-control" name="minVolume" id="field_minVolume"
+                    ng-model="vm.marketOrder.minVolume"
+                    required />
+            <div ng-show="editForm.minVolume.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.minVolume.$error.required">
+                    This field is required.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.minVolume.$error.number">
+                    This field should be a number.
+                </p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_duration">Duration</label>
+            <input type="number" class="form-control" name="duration" id="field_duration"
+                    ng-model="vm.marketOrder.duration"
+                    required />
+            <div ng-show="editForm.duration.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.duration.$error.required">
+                    This field is required.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.duration.$error.number">
+                    This field should be a number.
+                </p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="field_invType">invType</label>
+            <select class="form-control" id="field_invType" name="invType" ng-model="vm.marketOrder.invType" ng-options="invType as invType.typeName for invType in vm.invtypes track by invType.id">
+                <option value=""></option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="vm.clear()">
+            <span class="glyphicon glyphicon-ban-circle"></span>&nbsp;<span>Cancel</span>
+        </button>
+        <button type="submit" ng-disabled="editForm.$invalid || isSaving" class="btn btn-primary">
+            <span class="glyphicon glyphicon-save"></span>&nbsp;<span>Save</span>
+        </button>
+    </div>
+</form>

@@ -1,0 +1,63 @@
+
+<div>
+    <h2><span>MarketOrder</span> {{vm.marketOrder.id}}</h2>
+    <hr>
+    <dl class="dl-horizontal">
+        <dt><span>Buy</dt></dt>
+        <dd>
+            <span>{{vm.marketOrder.buy}}<span>
+        </dd>
+        <hr>
+        <dt><span>Issued</dt></dt>
+        <dd>
+            <span>{{vm.marketOrder.issued | date:'medium'}}</span>
+        </dd>
+        <hr>
+        <dt><span>Price</dt></dt>
+        <dd>
+            <span>{{vm.marketOrder.price}}<span>
+        </dd>
+        <hr>
+        <dt><span>VolumeEntered</dt></dt>
+        <dd>
+            <span>{{vm.marketOrder.volumeEntered}}<span>
+        </dd>
+        <hr>
+        <dt><span>StationID</dt></dt>
+        <dd>
+            <span>{{vm.marketOrder.stationID}}<span>
+        </dd>
+        <hr>
+        <dt><span>Volume</dt></dt>
+        <dd>
+            <span>{{vm.marketOrder.volume}}<span>
+        </dd>
+        <hr>
+        <dt><span>Range</dt></dt>
+        <dd>
+            <span>{{vm.marketOrder.range}}<span>
+        </dd>
+        <hr>
+        <dt><span>MinVolume</dt></dt>
+        <dd>
+            <span>{{vm.marketOrder.minVolume}}<span>
+        </dd>
+        <hr>
+        <dt><span>Duration</dt></dt>
+        <dd>
+            <span>{{vm.marketOrder.duration}}<span>
+        </dd>
+        <hr>
+        <dt><span>invType</span></dt>
+        <dd>
+            <a ui-sref="inv-type-detail({id:vm.marketOrder.invType.id})">{{vm.marketOrder.invType.typeName}}</a>
+        </dd>
+        <hr>
+    </dl>
+
+    <button type="submit"
+            onclick="window.history.back()"
+            class="btn btn-info">
+        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span> Back</span>
+    </button>
+</div>
