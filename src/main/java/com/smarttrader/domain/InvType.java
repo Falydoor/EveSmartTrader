@@ -12,7 +12,7 @@ import java.util.Objects;
  * A InvType.
  */
 @Entity
-@Table(name = "inv_types")
+@Table(name = "inv_type")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 @Document(indexName = "invtype")
 public class InvType implements Serializable {
@@ -20,7 +20,6 @@ public class InvType implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "type_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -64,7 +63,6 @@ public class InvType implements Serializable {
     private Long graphicID;
 
     @ManyToOne
-    @JoinColumn(name = "inv_market_group_id")
     private InvMarketGroup invMarketGroup;
 
     public Long getId() {

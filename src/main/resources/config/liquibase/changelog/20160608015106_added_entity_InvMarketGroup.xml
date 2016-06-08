@@ -17,8 +17,8 @@
         Added the entity InvMarketGroup.
     -->
     <changeSet id="20160608015106" author="jhipster">
-        <createTable tableName="inv_market_groups">
-            <column name="market_group_id" type="bigint" autoIncrement="${autoIncrement}">
+        <createTable tableName="inv_market_group">
+            <column name="id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="parent_group_id" type="bigint">

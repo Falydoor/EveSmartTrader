@@ -64,6 +64,6 @@
     "changelogDate": "20160608015106",
     "dto": "no",
     "service": "no",
-    "entityTableName": "inv_types",
+    "entityTableName": "inv_type",
     "pagination": "pagination"
 }

@@ -17,8 +17,8 @@
         Added the entity InvType.
     -->
     <changeSet id="20160608015106" author="jhipster">
-        <createTable tableName="inv_types">
-            <column name="type_id" type="bigint" autoIncrement="${autoIncrement}">
+        <createTable tableName="inv_type">
+            <column name="id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="group_id" type="bigint">
@@ -83,10 +83,10 @@
                  path="../invTypes.sql"
                  relativeToChangelogFile="true"/>
         <addForeignKeyConstraint baseColumnNames="inv_market_group_id"
-                                 baseTableName="inv_types"
+                                 baseTableName="inv_type"
                                  constraintName="fk_invtype_invmarketgroup_id"
-                                 referencedColumnNames="market_group_id"
-                                 referencedTableName="inv_market_groups"/>
+                                 referencedColumnNames="id"
+                                 referencedTableName="inv_market_group"/>
 
     </changeSet>
 </databaseChangeLog>

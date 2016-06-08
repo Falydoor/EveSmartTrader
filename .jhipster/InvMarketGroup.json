@@ -25,6 +25,6 @@
     "changelogDate": "20160608015106",
     "dto": "no",
     "service": "no",
-    "entityTableName": "inv_market_groups",
+    "entityTableName": "inv_market_group",
     "pagination": "pagination"
 }

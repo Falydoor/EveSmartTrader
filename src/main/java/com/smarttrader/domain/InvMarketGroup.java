@@ -12,7 +12,7 @@ import java.util.Objects;
  * A InvMarketGroup.
  */
 @Entity
-@Table(name = "inv_market_groups")
+@Table(name = "inv_market_group")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 @Document(indexName = "invmarketgroup")
 public class InvMarketGroup implements Serializable {
@@ -20,7 +20,6 @@ public class InvMarketGroup implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "market_group_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
