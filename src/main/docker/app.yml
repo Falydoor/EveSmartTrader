@@ -1,0 +1,21 @@
+version: '2'
+services:
+    evesmarttrader-app:
+        image: evesmarttrader
+        external_links:
+            - evesmarttrader-postgresql:postgresql
+            - evesmarttrader-elasticsearch:elasticsearch
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/EveSmartTrader
+            - SPRING_DATA_ELASTICSEARCH_CLUSTER_NODES=elasticsearch:9300
+        ports:
+            - 8080:8080
+    evesmarttrader-postgresql:
+        extends:
+            file: postgresql.yml
+            service: evesmarttrader-postgresql
+    evesmarttrader-elasticsearch:
+        extends:
+            file: elasticsearch.yml
+            service: evesmarttrader-elasticsearch

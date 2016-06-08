@@ -1,0 +1,12 @@
+version: '2'
+services:
+    evesmarttrader-postgresql:
+        container_name: evesmarttrader-postgresql
+        image: postgres:9.5.1
+        # volumes:
+        #     - ~/volumes/jhipster/EveSmartTrader/postgresql/:/var/lib/postgresql/
+        environment:
+            - POSTGRES_USER=EveSmartTrader
+            - POSTGRES_PASSWORD=
+        ports:
+            - 5432:5432
