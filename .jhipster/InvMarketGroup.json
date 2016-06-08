@@ -1,0 +1,30 @@
+{
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "parentGroupID",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "marketGroupName",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "description",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "iconID",
+            "fieldType": "Integer"
+        },
+        {
+            "fieldName": "hasTypes",
+            "fieldType": "Integer"
+        }
+    ],
+    "changelogDate": "20160608015106",
+    "dto": "no",
+    "service": "no",
+    "entityTableName": "inv_market_groups",
+    "pagination": "pagination"
+}
