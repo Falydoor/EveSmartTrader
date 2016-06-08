@@ -1,0 +1,66 @@
+{
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "groupID",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "typeName",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "description",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "mass",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "volume",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "capacity",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "portionSize",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "raceID",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "basePrice",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "published",
+            "fieldType": "Integer"
+        },
+        {
+            "fieldName": "marketGroupID",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "iconID",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "soundID",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "graphicID",
+            "fieldType": "Long"
+        }
+    ],
+    "changelogDate": "20160608015106",
+    "dto": "no",
+    "service": "no",
+    "entityTableName": "inv_types",
+    "pagination": "pagination"
+}

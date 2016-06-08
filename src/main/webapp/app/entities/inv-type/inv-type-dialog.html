@@ -1,0 +1,110 @@
+
+<form name="editForm" role="form" novalidate ng-submit="vm.save()">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                ng-click="vm.clear()">&times;</button>
+        <h4 class="modal-title" id="myInvTypeLabel">Create or edit a InvType</h4>
+    </div>
+    <div class="modal-body">
+        <jhi-alert-error></jhi-alert-error>
+        <div class="form-group">
+            <label for="id">ID</label>
+            <input type="text" class="form-control" id="id" name="id"
+                    ng-model="vm.invType.id" readonly />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_groupID">GroupID</label>
+            <input type="number" class="form-control" name="groupID" id="field_groupID"
+                    ng-model="vm.invType.groupID"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_typeName">TypeName</label>
+            <input type="text" class="form-control" name="typeName" id="field_typeName"
+                    ng-model="vm.invType.typeName"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_description">Description</label>
+            <input type="text" class="form-control" name="description" id="field_description"
+                    ng-model="vm.invType.description"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_mass">Mass</label>
+            <input type="number" class="form-control" name="mass" id="field_mass"
+                    ng-model="vm.invType.mass"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_volume">Volume</label>
+            <input type="number" class="form-control" name="volume" id="field_volume"
+                    ng-model="vm.invType.volume"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_capacity">Capacity</label>
+            <input type="number" class="form-control" name="capacity" id="field_capacity"
+                    ng-model="vm.invType.capacity"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_portionSize">PortionSize</label>
+            <input type="number" class="form-control" name="portionSize" id="field_portionSize"
+                    ng-model="vm.invType.portionSize"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_raceID">RaceID</label>
+            <input type="number" class="form-control" name="raceID" id="field_raceID"
+                    ng-model="vm.invType.raceID"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_basePrice">BasePrice</label>
+            <input type="number" class="form-control" name="basePrice" id="field_basePrice"
+                    ng-model="vm.invType.basePrice"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_published">Published</label>
+            <input type="number" class="form-control" name="published" id="field_published"
+                    ng-model="vm.invType.published"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_marketGroupID">MarketGroupID</label>
+            <input type="number" class="form-control" name="marketGroupID" id="field_marketGroupID"
+                    ng-model="vm.invType.marketGroupID"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_iconID">IconID</label>
+            <input type="number" class="form-control" name="iconID" id="field_iconID"
+                    ng-model="vm.invType.iconID"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_soundID">SoundID</label>
+            <input type="number" class="form-control" name="soundID" id="field_soundID"
+                    ng-model="vm.invType.soundID"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_graphicID">GraphicID</label>
+            <input type="number" class="form-control" name="graphicID" id="field_graphicID"
+                    ng-model="vm.invType.graphicID"
+                     />
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="vm.clear()">
+            <span class="glyphicon glyphicon-ban-circle"></span>&nbsp;<span>Cancel</span>
+        </button>
+        <button type="submit" ng-disabled="editForm.$invalid || isSaving" class="btn btn-primary">
+            <span class="glyphicon glyphicon-save"></span>&nbsp;<span>Save</span>
+        </button>
+    </div>
+</form>
