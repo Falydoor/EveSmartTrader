@@ -61,9 +61,7 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="market_group_id" type="bigint">
-                <constraints nullable="true" />
-            </column>
+            <column name="inv_market_group_id" type="bigint"/>
 
             <column name="icon_id" type="bigint">
                 <constraints nullable="true" />
@@ -84,6 +82,11 @@
                  encoding="utf8"
                  path="../invTypes.sql"
                  relativeToChangelogFile="true"/>
+        <addForeignKeyConstraint baseColumnNames="inv_market_group_id"
+                                 baseTableName="inv_types"
+                                 constraintName="fk_invtype_invmarketgroup_id"
+                                 referencedColumnNames="market_group_id"
+                                 referencedTableName="inv_market_groups"/>
 
     </changeSet>
 </databaseChangeLog>

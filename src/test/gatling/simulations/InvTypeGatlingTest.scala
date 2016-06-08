@@ -67,7 +67,7 @@ class InvTypeGatlingTest extends Simulation {
             .exec(http("Create new invType")
             .post("/api/inv-types")
             .headers(headers_http_authenticated)
-            .body(StringBody("""{"id":null, "groupID":null, "typeName":"SAMPLE_TEXT", "description":"SAMPLE_TEXT", "mass":null, "volume":null, "capacity":null, "portionSize":null, "raceID":null, "basePrice":null, "published":"0", "marketGroupID":null, "iconID":null, "soundID":null, "graphicID":null}""")).asJSON
+            .body(StringBody("""{"id":null, "groupID":null, "typeName":"SAMPLE_TEXT", "description":"SAMPLE_TEXT", "mass":null, "volume":null, "capacity":null, "portionSize":null, "raceID":null, "basePrice":null, "published":"0", "iconID":null, "soundID":null, "graphicID":null}""")).asJSON
             .check(status.is(201))
             .check(headerRegex("Location", "(.*)").saveAs("new_invType_url"))).exitHereIfFailed
             .pause(10)

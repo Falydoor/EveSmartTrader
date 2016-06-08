@@ -1,5 +1,12 @@
 {
-    "relationships": [],
+    "relationships": [
+        {
+            "relationshipName": "invMarketGroup",
+            "otherEntityName": "invMarketGroup",
+            "relationshipType": "many-to-one",
+            "otherEntityField": "marketGroupName"
+        }
+    ],
     "fields": [
         {
             "fieldName": "groupID",
@@ -40,10 +47,6 @@
         {
             "fieldName": "published",
             "fieldType": "Integer"
-        },
-        {
-            "fieldName": "marketGroupID",
-            "fieldType": "Long"
         },
         {
             "fieldName": "iconID",

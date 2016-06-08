@@ -74,12 +74,6 @@
                      />
         </div>
         <div class="form-group">
-            <label class="control-label" for="field_marketGroupID">MarketGroupID</label>
-            <input type="number" class="form-control" name="marketGroupID" id="field_marketGroupID"
-                    ng-model="vm.invType.marketGroupID"
-                     />
-        </div>
-        <div class="form-group">
             <label class="control-label" for="field_iconID">IconID</label>
             <input type="number" class="form-control" name="iconID" id="field_iconID"
                     ng-model="vm.invType.iconID"
@@ -98,6 +92,12 @@
                      />
         </div>
 
+        <div class="form-group">
+            <label for="field_invMarketGroup">invMarketGroup</label>
+            <select class="form-control" id="field_invMarketGroup" name="invMarketGroup" ng-model="vm.invType.invMarketGroup" ng-options="invMarketGroup as invMarketGroup.marketGroupName for invMarketGroup in vm.invmarketgroups track by invMarketGroup.id">
+                <option value=""></option>
+            </select>
+        </div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="vm.clear()">

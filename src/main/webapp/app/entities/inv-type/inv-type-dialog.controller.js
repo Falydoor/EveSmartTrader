@@ -5,11 +5,12 @@
         .module('eveSmartTraderApp')
         .controller('InvTypeDialogController', InvTypeDialogController);
 
-    InvTypeDialogController.$inject = ['$scope', '$stateParams', '$uibModalInstance', 'entity', 'InvType'];
+    InvTypeDialogController.$inject = ['$scope', '$stateParams', '$uibModalInstance', 'entity', 'InvType', 'InvMarketGroup'];
 
-    function InvTypeDialogController ($scope, $stateParams, $uibModalInstance, entity, InvType) {
+    function InvTypeDialogController ($scope, $stateParams, $uibModalInstance, entity, InvType, InvMarketGroup) {
         var vm = this;
         vm.invType = entity;
+        vm.invmarketgroups = InvMarketGroup.query();
         vm.load = function(id) {
             InvType.get({id : id}, function(result) {
                 vm.invType = result;

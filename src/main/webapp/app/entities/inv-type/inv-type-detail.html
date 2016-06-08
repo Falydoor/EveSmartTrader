@@ -53,11 +53,6 @@
             <span>{{vm.invType.published}}<span>
         </dd>
         <hr>
-        <dt><span>MarketGroupID</dt></dt>
-        <dd>
-            <span>{{vm.invType.marketGroupID}}<span>
-        </dd>
-        <hr>
         <dt><span>IconID</dt></dt>
         <dd>
             <span>{{vm.invType.iconID}}<span>
@@ -71,6 +66,11 @@
         <dt><span>GraphicID</dt></dt>
         <dd>
             <span>{{vm.invType.graphicID}}<span>
+        </dd>
+        <hr>
+        <dt><span>invMarketGroup</span></dt>
+        <dd>
+            <a ui-sref="inv-market-group-detail({id:vm.invType.invMarketGroup.id})">{{vm.invType.invMarketGroup.marketGroupName}}</a>
         </dd>
         <hr>
     </dl>

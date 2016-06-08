@@ -54,9 +54,6 @@ public class InvType implements Serializable {
     @Column(name = "published")
     private Integer published;
 
-    @Column(name = "market_group_id")
-    private Long marketGroupID;
-
     @Column(name = "icon_id")
     private Long iconID;
 
@@ -65,6 +62,10 @@ public class InvType implements Serializable {
 
     @Column(name = "graphic_id")
     private Long graphicID;
+
+    @ManyToOne
+    @JoinColumn(name = "inv_market_group_id")
+    private InvMarketGroup invMarketGroup;
 
     public Long getId() {
         return id;
@@ -154,14 +155,6 @@ public class InvType implements Serializable {
         this.published = published;
     }
 
-    public Long getMarketGroupID() {
-        return marketGroupID;
-    }
-
-    public void setMarketGroupID(Long marketGroupID) {
-        this.marketGroupID = marketGroupID;
-    }
-
     public Long getIconID() {
         return iconID;
     }
@@ -184,6 +177,14 @@ public class InvType implements Serializable {
 
     public void setGraphicID(Long graphicID) {
         this.graphicID = graphicID;
+    }
+
+    public InvMarketGroup getInvMarketGroup() {
+        return invMarketGroup;
+    }
+
+    public void setInvMarketGroup(InvMarketGroup invMarketGroup) {
+        this.invMarketGroup = invMarketGroup;
     }
 
     @Override
@@ -220,7 +221,6 @@ public class InvType implements Serializable {
             ", raceID='" + raceID + "'" +
             ", basePrice='" + basePrice + "'" +
             ", published='" + published + "'" +
-            ", marketGroupID='" + marketGroupID + "'" +
             ", iconID='" + iconID + "'" +
             ", soundID='" + soundID + "'" +
             ", graphicID='" + graphicID + "'" +

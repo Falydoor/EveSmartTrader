@@ -92,7 +92,6 @@
                                 raceID: null,
                                 basePrice: null,
                                 published: null,
-                                marketGroupID: null,
                                 iconID: null,
                                 soundID: null,
                                 graphicID: null,

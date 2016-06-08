@@ -46,10 +46,10 @@
                     <th jh-sort-by="raceID"><span>RaceID</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th jh-sort-by="basePrice"><span>BasePrice</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th jh-sort-by="published"><span>Published</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="marketGroupID"><span>MarketGroupID</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th jh-sort-by="iconID"><span>IconID</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th jh-sort-by="soundID"><span>SoundID</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th jh-sort-by="graphicID"><span>GraphicID</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="invMarketGroup.marketGroupName"><span>invMarketGroup</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th></th>
                 </tr>
             </thead>
@@ -66,10 +66,12 @@
                     <td>{{invType.raceID}}</td>
                     <td>{{invType.basePrice}}</td>
                     <td>{{invType.published}}</td>
-                    <td>{{invType.marketGroupID}}</td>
                     <td>{{invType.iconID}}</td>
                     <td>{{invType.soundID}}</td>
                     <td>{{invType.graphicID}}</td>
+                    <td>
+                        <a ui-sref="inv-market-group-detail({id:invType.invMarketGroup.id})">{{invType.invMarketGroup.marketGroupName}}</a>
+                    </td>
                     <td class="text-right">
                         <div class="btn-group flex-btn-group-container">
                             <button type="submit"

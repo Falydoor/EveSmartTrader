@@ -71,9 +71,6 @@ public class InvTypeResourceIntTest {
     private static final Integer DEFAULT_PUBLISHED = 1;
     private static final Integer UPDATED_PUBLISHED = 2;
 
-    private static final Long DEFAULT_MARKET_GROUP_ID = 1L;
-    private static final Long UPDATED_MARKET_GROUP_ID = 2L;
-
     private static final Long DEFAULT_ICON_ID = 1L;
     private static final Long UPDATED_ICON_ID = 2L;
 
@@ -124,7 +121,6 @@ public class InvTypeResourceIntTest {
         invType.setRaceID(DEFAULT_RACE_ID);
         invType.setBasePrice(DEFAULT_BASE_PRICE);
         invType.setPublished(DEFAULT_PUBLISHED);
-        invType.setMarketGroupID(DEFAULT_MARKET_GROUP_ID);
         invType.setIconID(DEFAULT_ICON_ID);
         invType.setSoundID(DEFAULT_SOUND_ID);
         invType.setGraphicID(DEFAULT_GRAPHIC_ID);
@@ -156,7 +152,6 @@ public class InvTypeResourceIntTest {
         assertThat(testInvType.getRaceID()).isEqualTo(DEFAULT_RACE_ID);
         assertThat(testInvType.getBasePrice()).isEqualTo(DEFAULT_BASE_PRICE);
         assertThat(testInvType.getPublished()).isEqualTo(DEFAULT_PUBLISHED);
-        assertThat(testInvType.getMarketGroupID()).isEqualTo(DEFAULT_MARKET_GROUP_ID);
         assertThat(testInvType.getIconID()).isEqualTo(DEFAULT_ICON_ID);
         assertThat(testInvType.getSoundID()).isEqualTo(DEFAULT_SOUND_ID);
         assertThat(testInvType.getGraphicID()).isEqualTo(DEFAULT_GRAPHIC_ID);
@@ -187,7 +182,6 @@ public class InvTypeResourceIntTest {
                 .andExpect(jsonPath("$.[*].raceID").value(hasItem(DEFAULT_RACE_ID.intValue())))
                 .andExpect(jsonPath("$.[*].basePrice").value(hasItem(DEFAULT_BASE_PRICE.doubleValue())))
                 .andExpect(jsonPath("$.[*].published").value(hasItem(DEFAULT_PUBLISHED)))
-                .andExpect(jsonPath("$.[*].marketGroupID").value(hasItem(DEFAULT_MARKET_GROUP_ID.intValue())))
                 .andExpect(jsonPath("$.[*].iconID").value(hasItem(DEFAULT_ICON_ID.intValue())))
                 .andExpect(jsonPath("$.[*].soundID").value(hasItem(DEFAULT_SOUND_ID.intValue())))
                 .andExpect(jsonPath("$.[*].graphicID").value(hasItem(DEFAULT_GRAPHIC_ID.intValue())));
@@ -214,7 +208,6 @@ public class InvTypeResourceIntTest {
             .andExpect(jsonPath("$.raceID").value(DEFAULT_RACE_ID.intValue()))
             .andExpect(jsonPath("$.basePrice").value(DEFAULT_BASE_PRICE.doubleValue()))
             .andExpect(jsonPath("$.published").value(DEFAULT_PUBLISHED))
-            .andExpect(jsonPath("$.marketGroupID").value(DEFAULT_MARKET_GROUP_ID.intValue()))
             .andExpect(jsonPath("$.iconID").value(DEFAULT_ICON_ID.intValue()))
             .andExpect(jsonPath("$.soundID").value(DEFAULT_SOUND_ID.intValue()))
             .andExpect(jsonPath("$.graphicID").value(DEFAULT_GRAPHIC_ID.intValue()));
@@ -249,7 +242,6 @@ public class InvTypeResourceIntTest {
         updatedInvType.setRaceID(UPDATED_RACE_ID);
         updatedInvType.setBasePrice(UPDATED_BASE_PRICE);
         updatedInvType.setPublished(UPDATED_PUBLISHED);
-        updatedInvType.setMarketGroupID(UPDATED_MARKET_GROUP_ID);
         updatedInvType.setIconID(UPDATED_ICON_ID);
         updatedInvType.setSoundID(UPDATED_SOUND_ID);
         updatedInvType.setGraphicID(UPDATED_GRAPHIC_ID);
@@ -273,7 +265,6 @@ public class InvTypeResourceIntTest {
         assertThat(testInvType.getRaceID()).isEqualTo(UPDATED_RACE_ID);
         assertThat(testInvType.getBasePrice()).isEqualTo(UPDATED_BASE_PRICE);
         assertThat(testInvType.getPublished()).isEqualTo(UPDATED_PUBLISHED);
-        assertThat(testInvType.getMarketGroupID()).isEqualTo(UPDATED_MARKET_GROUP_ID);
         assertThat(testInvType.getIconID()).isEqualTo(UPDATED_ICON_ID);
         assertThat(testInvType.getSoundID()).isEqualTo(UPDATED_SOUND_ID);
         assertThat(testInvType.getGraphicID()).isEqualTo(UPDATED_GRAPHIC_ID);
@@ -327,7 +318,6 @@ public class InvTypeResourceIntTest {
             .andExpect(jsonPath("$.[*].raceID").value(hasItem(DEFAULT_RACE_ID.intValue())))
             .andExpect(jsonPath("$.[*].basePrice").value(hasItem(DEFAULT_BASE_PRICE.doubleValue())))
             .andExpect(jsonPath("$.[*].published").value(hasItem(DEFAULT_PUBLISHED)))
-            .andExpect(jsonPath("$.[*].marketGroupID").value(hasItem(DEFAULT_MARKET_GROUP_ID.intValue())))
             .andExpect(jsonPath("$.[*].iconID").value(hasItem(DEFAULT_ICON_ID.intValue())))
             .andExpect(jsonPath("$.[*].soundID").value(hasItem(DEFAULT_SOUND_ID.intValue())))
             .andExpect(jsonPath("$.[*].graphicID").value(hasItem(DEFAULT_GRAPHIC_ID.intValue())));
