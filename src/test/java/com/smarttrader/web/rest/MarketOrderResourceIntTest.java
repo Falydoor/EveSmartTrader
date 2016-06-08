@@ -59,8 +59,8 @@ public class MarketOrderResourceIntTest {
     private static final Double DEFAULT_PRICE = 1D;
     private static final Double UPDATED_PRICE = 2D;
 
-    private static final Double DEFAULT_VOLUME_ENTERED = 1D;
-    private static final Double UPDATED_VOLUME_ENTERED = 2D;
+    private static final Integer DEFAULT_VOLUME_ENTERED = 1;
+    private static final Integer UPDATED_VOLUME_ENTERED = 2;
 
     private static final Long DEFAULT_STATION_ID = 1L;
     private static final Long UPDATED_STATION_ID = 2L;
@@ -70,8 +70,8 @@ public class MarketOrderResourceIntTest {
     private static final String DEFAULT_RANGE = "AAAAA";
     private static final String UPDATED_RANGE = "BBBBB";
 
-    private static final Double DEFAULT_MIN_VOLUME = 1D;
-    private static final Double UPDATED_MIN_VOLUME = 2D;
+    private static final Integer DEFAULT_MIN_VOLUME = 1;
+    private static final Integer UPDATED_MIN_VOLUME = 2;
 
     private static final Integer DEFAULT_DURATION = 1;
     private static final Integer UPDATED_DURATION = 2;
@@ -325,11 +325,11 @@ public class MarketOrderResourceIntTest {
                 .andExpect(jsonPath("$.[*].buy").value(hasItem(DEFAULT_BUY.booleanValue())))
                 .andExpect(jsonPath("$.[*].issued").value(hasItem(DEFAULT_ISSUED_STR)))
                 .andExpect(jsonPath("$.[*].price").value(hasItem(DEFAULT_PRICE.doubleValue())))
-                .andExpect(jsonPath("$.[*].volumeEntered").value(hasItem(DEFAULT_VOLUME_ENTERED.doubleValue())))
+                .andExpect(jsonPath("$.[*].volumeEntered").value(hasItem(DEFAULT_VOLUME_ENTERED)))
                 .andExpect(jsonPath("$.[*].stationID").value(hasItem(DEFAULT_STATION_ID.intValue())))
                 .andExpect(jsonPath("$.[*].volume").value(hasItem(DEFAULT_VOLUME.intValue())))
                 .andExpect(jsonPath("$.[*].range").value(hasItem(DEFAULT_RANGE.toString())))
-                .andExpect(jsonPath("$.[*].minVolume").value(hasItem(DEFAULT_MIN_VOLUME.doubleValue())))
+                .andExpect(jsonPath("$.[*].minVolume").value(hasItem(DEFAULT_MIN_VOLUME)))
                 .andExpect(jsonPath("$.[*].duration").value(hasItem(DEFAULT_DURATION)));
     }
 
@@ -347,11 +347,11 @@ public class MarketOrderResourceIntTest {
             .andExpect(jsonPath("$.buy").value(DEFAULT_BUY.booleanValue()))
             .andExpect(jsonPath("$.issued").value(DEFAULT_ISSUED_STR))
             .andExpect(jsonPath("$.price").value(DEFAULT_PRICE.doubleValue()))
-            .andExpect(jsonPath("$.volumeEntered").value(DEFAULT_VOLUME_ENTERED.doubleValue()))
+            .andExpect(jsonPath("$.volumeEntered").value(DEFAULT_VOLUME_ENTERED))
             .andExpect(jsonPath("$.stationID").value(DEFAULT_STATION_ID.intValue()))
             .andExpect(jsonPath("$.volume").value(DEFAULT_VOLUME.intValue()))
             .andExpect(jsonPath("$.range").value(DEFAULT_RANGE.toString()))
-            .andExpect(jsonPath("$.minVolume").value(DEFAULT_MIN_VOLUME.doubleValue()))
+            .andExpect(jsonPath("$.minVolume").value(DEFAULT_MIN_VOLUME))
             .andExpect(jsonPath("$.duration").value(DEFAULT_DURATION));
     }
 
@@ -445,11 +445,11 @@ public class MarketOrderResourceIntTest {
             .andExpect(jsonPath("$.[*].buy").value(hasItem(DEFAULT_BUY.booleanValue())))
             .andExpect(jsonPath("$.[*].issued").value(hasItem(DEFAULT_ISSUED_STR)))
             .andExpect(jsonPath("$.[*].price").value(hasItem(DEFAULT_PRICE.doubleValue())))
-            .andExpect(jsonPath("$.[*].volumeEntered").value(hasItem(DEFAULT_VOLUME_ENTERED.doubleValue())))
+            .andExpect(jsonPath("$.[*].volumeEntered").value(hasItem(DEFAULT_VOLUME_ENTERED)))
             .andExpect(jsonPath("$.[*].stationID").value(hasItem(DEFAULT_STATION_ID.intValue())))
             .andExpect(jsonPath("$.[*].volume").value(hasItem(DEFAULT_VOLUME.intValue())))
             .andExpect(jsonPath("$.[*].range").value(hasItem(DEFAULT_RANGE.toString())))
-            .andExpect(jsonPath("$.[*].minVolume").value(hasItem(DEFAULT_MIN_VOLUME.doubleValue())))
+            .andExpect(jsonPath("$.[*].minVolume").value(hasItem(DEFAULT_MIN_VOLUME)))
             .andExpect(jsonPath("$.[*].duration").value(hasItem(DEFAULT_DURATION)));
     }
 }

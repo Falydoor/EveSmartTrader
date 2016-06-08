@@ -2,12 +2,15 @@ package com.smarttrader.domain;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
@@ -22,7 +25,6 @@ public class MarketOrder implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NotNull
@@ -39,7 +41,7 @@ public class MarketOrder implements Serializable {
 
     @NotNull
     @Column(name = "volume_entered", nullable = false)
-    private Double volumeEntered;
+    private Integer volumeEntered;
 
     @NotNull
     @Column(name = "station_id", nullable = false)
@@ -55,7 +57,7 @@ public class MarketOrder implements Serializable {
 
     @NotNull
     @Column(name = "min_volume", nullable = false)
-    private Double minVolume;
+    private Integer minVolume;
 
     @NotNull
     @Column(name = "duration", nullable = false)
@@ -63,6 +65,22 @@ public class MarketOrder implements Serializable {
 
     @ManyToOne
     private InvType invType;
+
+    public MarketOrder() {
+    }
+
+    public MarketOrder(JSONObject json) throws JSONException {
+        buy = json.getBoolean("buy");
+        issued = ZonedDateTime.parse(json.getString("issued") + "+00:00", DateTimeFormatter.ISO_DATE_TIME);
+        price = json.getDouble("price");
+        volumeEntered = json.getInt("volumeEntered");
+        stationID = json.getLong("stationID");
+        volume = json.getLong("volume");
+        range = json.getString("range");
+        minVolume = json.getInt("minVolume");
+        duration = json.getInt("duration");
+        id = json.getLong("id");
+    }
 
     public Long getId() {
         return id;
@@ -96,11 +114,11 @@ public class MarketOrder implements Serializable {
         this.price = price;
     }
 
-    public Double getVolumeEntered() {
+    public Integer getVolumeEntered() {
         return volumeEntered;
     }
 
-    public void setVolumeEntered(Double volumeEntered) {
+    public void setVolumeEntered(Integer volumeEntered) {
         this.volumeEntered = volumeEntered;
     }
 
@@ -128,11 +146,11 @@ public class MarketOrder implements Serializable {
         this.range = range;
     }
 
-    public Double getMinVolume() {
+    public Integer getMinVolume() {
         return minVolume;
     }
 
-    public void setMinVolume(Double minVolume) {
+    public void setMinVolume(Integer minVolume) {
         this.minVolume = minVolume;
     }
 
@@ -161,7 +179,7 @@ public class MarketOrder implements Serializable {
             return false;
         }
         MarketOrder marketOrder = (MarketOrder) o;
-        if(marketOrder.id == null || id == null) {
+        if (marketOrder.id == null || id == null) {
             return false;
         }
         return Objects.equals(id, marketOrder.id);

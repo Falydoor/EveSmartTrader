@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.smarttrader.domain.MarketOrder;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.search.MarketOrderSearchRepository;
+import com.smarttrader.service.MarketOrderService;
 import com.smarttrader.web.rest.util.HeaderUtil;
 import com.smarttrader.web.rest.util.PaginationUtil;
 import org.slf4j.Logger;
@@ -22,10 +23,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * REST controller for managing MarketOrder.
@@ -35,13 +34,16 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class MarketOrderResource {
 
     private final Logger log = LoggerFactory.getLogger(MarketOrderResource.class);
-        
+
     @Inject
     private MarketOrderRepository marketOrderRepository;
-    
+
     @Inject
     private MarketOrderSearchRepository marketOrderSearchRepository;
-    
+
+    @Inject
+    private MarketOrderService marketOrderService;
+
     /**
      * POST  /market-orders : Create a new marketOrder.
      *
@@ -104,7 +106,13 @@ public class MarketOrderResource {
     public ResponseEntity<List<MarketOrder>> getAllMarketOrders(Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to get a page of MarketOrders");
-        Page<MarketOrder> page = marketOrderRepository.findAll(pageable); 
+        Page<MarketOrder> page = marketOrderRepository.findAll(pageable);
+
+        if (page.getNumberOfElements() == 0) {
+            marketOrderService.retrieveMarketOrders();
+            page = marketOrderRepository.findAll(pageable);
+        }
+
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/market-orders");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }

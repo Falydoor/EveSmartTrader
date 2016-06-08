@@ -2,11 +2,12 @@ package com.smarttrader;
 
 import com.smarttrader.config.Constants;
 import com.smarttrader.config.JHipsterProperties;
-
+import com.smarttrader.service.MarketOrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.autoconfigure.*;
+import org.springframework.boot.actuate.autoconfigure.MetricFilterAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.MetricRepositoryAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,14 +23,17 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @ComponentScan
-@EnableAutoConfiguration(exclude = { MetricFilterAutoConfiguration.class, MetricRepositoryAutoConfiguration.class })
-@EnableConfigurationProperties({ JHipsterProperties.class, LiquibaseProperties.class })
+@EnableAutoConfiguration(exclude = {MetricFilterAutoConfiguration.class, MetricRepositoryAutoConfiguration.class})
+@EnableConfigurationProperties({JHipsterProperties.class, LiquibaseProperties.class})
 public class EveSmartTraderApp {
 
     private static final Logger log = LoggerFactory.getLogger(EveSmartTraderApp.class);
 
     @Inject
     private Environment env;
+
+    @Inject
+    private MarketOrderService marketOrderService;
 
     /**
      * Initializes EveSmartTrader.
@@ -83,7 +87,7 @@ public class EveSmartTraderApp {
      */
     private static void addDefaultProfile(SpringApplication app, SimpleCommandLinePropertySource source) {
         if (!source.containsProperty("spring.profiles.active") &&
-                !System.getenv().containsKey("SPRING_PROFILES_ACTIVE")) {
+            !System.getenv().containsKey("SPRING_PROFILES_ACTIVE")) {
 
             app.setAdditionalProfiles(Constants.SPRING_PROFILE_DEVELOPMENT);
         }

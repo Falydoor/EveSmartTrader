@@ -33,7 +33,7 @@
                 <constraints nullable="false" />
             </column>
             
-            <column name="volume_entered" type="double">
+            <column name="volume_entered" type="integer">
                 <constraints nullable="false" />
             </column>
             
@@ -49,7 +49,7 @@
                 <constraints nullable="false" />
             </column>
             
-            <column name="min_volume" type="double">
+            <column name="min_volume" type="integer">
                 <constraints nullable="false" />
             </column>
             

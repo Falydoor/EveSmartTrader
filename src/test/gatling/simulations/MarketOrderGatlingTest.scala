@@ -67,7 +67,7 @@ class MarketOrderGatlingTest extends Simulation {
             .exec(http("Create new marketOrder")
             .post("/api/market-orders")
             .headers(headers_http_authenticated)
-            .body(StringBody("""{"id":null, "buy":null, "issued":"2020-01-01T00:00:00.000Z", "price":null, "volumeEntered":null, "stationID":null, "volume":null, "range":"SAMPLE_TEXT", "minVolume":null, "duration":"0"}""")).asJSON
+            .body(StringBody("""{"id":null, "buy":null, "issued":"2020-01-01T00:00:00.000Z", "price":null, "volumeEntered":"0", "stationID":null, "volume":null, "range":"SAMPLE_TEXT", "minVolume":"0", "duration":"0"}""")).asJSON
             .check(status.is(201))
             .check(headerRegex("Location", "(.*)").saveAs("new_marketOrder_url"))).exitHereIfFailed
             .pause(10)

@@ -31,7 +31,7 @@
         },
         {
             "fieldName": "volumeEntered",
-            "fieldType": "Double",
+            "fieldType": "Integer",
             "fieldValidateRules": [
                 "required"
             ]
@@ -59,7 +59,7 @@
         },
         {
             "fieldName": "minVolume",
-            "fieldType": "Double",
+            "fieldType": "Integer",
             "fieldValidateRules": [
                 "required"
             ]
