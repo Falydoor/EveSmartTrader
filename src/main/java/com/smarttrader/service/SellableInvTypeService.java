@@ -1,0 +1,105 @@
+package com.smarttrader.service;
+
+import com.smarttrader.domain.InvMarketGroup;
+import com.smarttrader.domain.InvType;
+import com.smarttrader.domain.SellableInvType;
+import com.smarttrader.domain.enums.Region;
+import com.smarttrader.repository.InvMarketGroupRepository;
+import com.smarttrader.repository.InvTypeRepository;
+import com.smarttrader.repository.SellableInvTypeRepository;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Service class for managing sellable inv types.
+ */
+@Service
+@Transactional
+public class SellableInvTypeService {
+
+    private final Logger log = LoggerFactory.getLogger(SellableInvTypeService.class);
+
+    @Inject
+    private SellableInvTypeRepository sellableInvTypeRepository;
+
+    @Inject
+    private InvTypeRepository invTypeRepository;
+
+    @Inject
+    private InvMarketGroupRepository invMarketGroupRepository;
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void retrieveSellableInvType() {
+        // Delete old sellable inv types
+        sellableInvTypeRepository.deleteAllInBatch();
+        sellableInvTypeRepository.flush();
+
+        List<Long> sellableGroup = Arrays.asList(9L, 24L, 150L, 157L, 955L);
+
+        Set<SellableInvType> sellableInvTypes = new HashSet<>();
+        HttpClientBuilder client = HttpClientBuilder.create();
+        List<InvType> invTypes = invTypeRepository.findByInvMarketGroupNotNull().parallelStream().filter(invType -> {
+            long mainParentGroupID = invType.getInvMarketGroup().getId();
+            Long parentGroupID = invType.getInvMarketGroup().getParentGroupID();
+            while (parentGroupID != null) {
+                InvMarketGroup invMarketGroup = invMarketGroupRepository.findOne(parentGroupID);
+                mainParentGroupID = parentGroupID;
+                parentGroupID = invMarketGroup.getParentGroupID();
+            }
+            return sellableGroup.contains(mainParentGroupID) && invType.getVolume() <= 1000;
+        }).collect(Collectors.toList());
+        int[] k = {0};
+        invTypes.parallelStream().forEach(invType -> {
+            try {
+                int j = 0;
+                SellableInvType sellableInvType = new SellableInvType();
+                sellableInvType.setId(invType.getId());
+                String url = "https://crest-tq.eveonline.com/market/" + Region.THE_FORGE.getId() + "/types/" + invType.getId() + "/history/";
+                HttpGet request = new HttpGet(url);
+                CloseableHttpResponse response = client.build().execute(request);
+                JSONObject jsonObject = new JSONObject(IOUtils.toString(response.getEntity().getContent()));
+                JSONArray items = jsonObject.getJSONArray("items");
+                for (int i = items.length() - 1; i > Math.max(0, items.length() - 31); --i) {
+                    JSONObject item = items.optJSONObject(i);
+                    if ((item.getInt("volume") >= 50 && item.getDouble("highPrice") >= 2000000) || (item.getInt("volume") >= 500 && item.getDouble("highPrice") >= 1000000)) {
+                        ++j;
+                    }
+                    if (j > 14) {
+                        sellableInvTypes.add(sellableInvType);
+                        break;
+                    }
+                }
+                ++k[0];
+                if (k[0] % 100 == 0 || k[0] == invTypes.size()) {
+                    log.info("Sellable count : {}/{}", k[0], invTypes.size());
+                }
+            } catch (IOException e) {
+                log.error("Error getting sellable inv types from URL", e);
+            } catch (JSONException e) {
+                log.error("Error parsing sellable inv types", e);
+            }
+        });
+
+        log.info("Saving sellable inv type");
+        sellableInvTypeRepository.save(sellableInvTypes);
+        sellableInvTypeRepository.flush();
+    }
+}

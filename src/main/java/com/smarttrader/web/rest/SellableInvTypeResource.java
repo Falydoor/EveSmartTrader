@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.repository.SellableInvTypeRepository;
 import com.smarttrader.repository.search.SellableInvTypeSearchRepository;
+import com.smarttrader.service.SellableInvTypeService;
 import com.smarttrader.web.rest.util.HeaderUtil;
 import com.smarttrader.web.rest.util.PaginationUtil;
 import org.slf4j.Logger;
@@ -21,10 +22,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * REST controller for managing SellableInvType.
@@ -34,13 +33,16 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class SellableInvTypeResource {
 
     private final Logger log = LoggerFactory.getLogger(SellableInvTypeResource.class);
-        
+
     @Inject
     private SellableInvTypeRepository sellableInvTypeRepository;
-    
+
     @Inject
     private SellableInvTypeSearchRepository sellableInvTypeSearchRepository;
-    
+
+    @Inject
+    private SellableInvTypeService sellableInvTypeService;
+
     /**
      * POST  /sellable-inv-types : Create a new sellableInvType.
      *
@@ -103,7 +105,13 @@ public class SellableInvTypeResource {
     public ResponseEntity<List<SellableInvType>> getAllSellableInvTypes(Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to get a page of SellableInvTypes");
-        Page<SellableInvType> page = sellableInvTypeRepository.findAll(pageable); 
+        Page<SellableInvType> page = sellableInvTypeRepository.findAll(pageable);
+
+        if (page.getNumberOfElements() == 0) {
+            sellableInvTypeService.retrieveSellableInvType();
+            page = sellableInvTypeRepository.findAll(pageable);
+        }
+
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/sellable-inv-types");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
