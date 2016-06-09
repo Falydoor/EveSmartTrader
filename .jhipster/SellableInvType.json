@@ -1,0 +1,25 @@
+{
+    "relationships": [
+        {
+            "relationshipName": "marketOrder",
+            "otherEntityName": "marketOrder",
+            "relationshipType": "one-to-many",
+            "otherEntityField": "invType",
+            "otherEntityRelationshipName": "sellableInvType"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "sellable",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
+        }
+    ],
+    "changelogDate": "20160609015100",
+    "dto": "no",
+    "service": "no",
+    "entityTableName": "sellable_inv_type",
+    "pagination": "pagination"
+}

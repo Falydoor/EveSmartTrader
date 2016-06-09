@@ -66,6 +66,9 @@ public class MarketOrder implements Serializable {
     @ManyToOne
     private InvType invType;
 
+    @ManyToOne
+    private SellableInvType sellableInvType;
+
     public MarketOrder() {
     }
 
@@ -168,6 +171,14 @@ public class MarketOrder implements Serializable {
 
     public void setInvType(InvType invType) {
         this.invType = invType;
+    }
+
+    public SellableInvType getSellableInvType() {
+        return sellableInvType;
+    }
+
+    public void setSellableInvType(SellableInvType sellableInvType) {
+        this.sellableInvType = sellableInvType;
     }
 
     @Override

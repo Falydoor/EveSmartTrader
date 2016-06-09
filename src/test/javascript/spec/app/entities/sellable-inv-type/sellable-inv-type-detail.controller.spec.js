@@ -2,37 +2,35 @@
 
 describe('Controller Tests', function() {
 
-    describe('MarketOrder Management Detail Controller', function() {
+    describe('SellableInvType Management Detail Controller', function() {
         var $scope, $rootScope;
-        var MockEntity, MockMarketOrder, MockInvType, MockSellableInvType;
+        var MockEntity, MockSellableInvType, MockMarketOrder;
         var createController;
 
         beforeEach(inject(function($injector) {
             $rootScope = $injector.get('$rootScope');
             $scope = $rootScope.$new();
             MockEntity = jasmine.createSpy('MockEntity');
-            MockMarketOrder = jasmine.createSpy('MockMarketOrder');
-            MockInvType = jasmine.createSpy('MockInvType');
             MockSellableInvType = jasmine.createSpy('MockSellableInvType');
+            MockMarketOrder = jasmine.createSpy('MockMarketOrder');
             
 
             var locals = {
                 '$scope': $scope,
                 '$rootScope': $rootScope,
                 'entity': MockEntity ,
-                'MarketOrder': MockMarketOrder,
-                'InvType': MockInvType,
-                'SellableInvType': MockSellableInvType
+                'SellableInvType': MockSellableInvType,
+                'MarketOrder': MockMarketOrder
             };
             createController = function() {
-                $injector.get('$controller')("MarketOrderDetailController", locals);
+                $injector.get('$controller')("SellableInvTypeDetailController", locals);
             };
         }));
 
 
         describe('Root Scope Listening', function() {
             it('Unregisters root scope listener upon scope destruction', function() {
-                var eventType = 'eveSmartTraderApp:marketOrderUpdate';
+                var eventType = 'eveSmartTraderApp:sellableInvTypeUpdate';
 
                 createController();
                 expect($rootScope.$$listenerCount[eventType]).toEqual(1);

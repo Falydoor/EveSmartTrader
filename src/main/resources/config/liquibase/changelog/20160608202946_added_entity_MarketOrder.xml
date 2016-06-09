@@ -58,6 +58,7 @@
             </column>
             
             <column name="inv_type_id" type="bigint"/>
+            <column name="sellable_inv_type_id" type="bigint"/>
             <!-- jhipster-needle-liquibase-add-column - Jhipster will add columns here, do not remove-->
         </createTable>
         <dropDefaultValue tableName="market_order" columnName="issued" columnDataType="datetime"/>
@@ -67,6 +68,12 @@
                                  constraintName="fk_marketorder_invtype_id"
                                  referencedColumnNames="id"
                                  referencedTableName="inv_type"/>
+
+        <addForeignKeyConstraint baseColumnNames="sellable_inv_type_id"
+                                 baseTableName="market_order"
+                                 constraintName="fk_marketorder_sellableinvtype_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="sellable_inv_type"/>
 
     </changeSet>
 </databaseChangeLog>

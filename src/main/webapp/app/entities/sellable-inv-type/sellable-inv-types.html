@@ -1,13 +1,13 @@
 <div>
-    <h2>MarketOrders</h2>
+    <h2>SellableInvTypes</h2>
     <jhi-alert></jhi-alert>
     <div class="container-fluid">
         <div class="row">
             <div class="col-xs-4 no-padding-left">
-                <button class="btn btn-primary" ui-sref="market-order.new" >
+                <button class="btn btn-primary" ui-sref="sellable-inv-type.new" >
                     <span class="glyphicon glyphicon-plus"></span>
                     <span class="hidden-xs" >
-                        Create new MarketOrder
+                        Create new SellableInvType
                     </span>
                 </button>
             </div>
@@ -36,54 +36,30 @@
             <thead>
                 <tr jh-sort="vm.predicate" ascending="vm.reverse" callback="vm.transition()">
                     <th jh-sort-by="id"><span>ID</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="buy"><span>Buy</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="issued"><span>Issued</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="price"><span>Price</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="volumeEntered"><span>VolumeEntered</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="stationID"><span>StationID</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="volume"><span>Volume</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="range"><span>Range</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="minVolume"><span>MinVolume</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="duration"><span>Duration</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="invType.typeName"><span>invType</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="sellableInvType.id"><span>sellableInvType</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="sellable"><span>Sellable</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="marketOrder in vm.marketOrders track by marketOrder.id">
-                    <td><a ui-sref="market-order-detail({id:marketOrder.id})">{{marketOrder.id}}</a></td>
-                    <td>{{marketOrder.buy}}</td>
-                    <td>{{marketOrder.issued | date:'medium'}}</td>
-                    <td>{{marketOrder.price}}</td>
-                    <td>{{marketOrder.volumeEntered}}</td>
-                    <td>{{marketOrder.stationID}}</td>
-                    <td>{{marketOrder.volume}}</td>
-                    <td>{{marketOrder.range}}</td>
-                    <td>{{marketOrder.minVolume}}</td>
-                    <td>{{marketOrder.duration}}</td>
-                    <td>
-                        <a ui-sref="inv-type-detail({id:marketOrder.invType.id})">{{marketOrder.invType.typeName}}</a>
-                    </td>
-                    <td>
-                        <a ui-sref="sellable-inv-type-detail({id:marketOrder.sellableInvType.id})">{{marketOrder.sellableInvType.id}}</a>
-                    </td>
+                <tr ng-repeat="sellableInvType in vm.sellableInvTypes track by sellableInvType.id">
+                    <td><a ui-sref="sellable-inv-type-detail({id:sellableInvType.id})">{{sellableInvType.id}}</a></td>
+                    <td>{{sellableInvType.sellable}}</td>
                     <td class="text-right">
                         <div class="btn-group flex-btn-group-container">
                             <button type="submit"
-                                    ui-sref="market-order-detail({id:marketOrder.id})"
+                                    ui-sref="sellable-inv-type-detail({id:sellableInvType.id})"
                                     class="btn btn-info btn-sm">
                                 <span class="glyphicon glyphicon-eye-open"></span>
                                 <span class="hidden-xs hidden-sm"></span>
                             </button>
                             <button type="submit"
-                                    ui-sref="market-order.edit({id:marketOrder.id})"
+                                    ui-sref="sellable-inv-type.edit({id:sellableInvType.id})"
                                     class="btn btn-primary btn-sm">
                                 <span class="glyphicon glyphicon-pencil"></span>
                                 <span class="hidden-xs hidden-sm"></span>
                             </button>
                             <button type="submit"
-                                    ui-sref="market-order.delete({id:marketOrder.id})"
+                                    ui-sref="sellable-inv-type.delete({id:sellableInvType.id})"
                                     class="btn btn-danger btn-sm">
                                 <span class="glyphicon glyphicon-remove-circle"></span>
                                 <span class="hidden-xs hidden-sm"></span>

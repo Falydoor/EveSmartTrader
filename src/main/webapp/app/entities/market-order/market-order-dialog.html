@@ -160,6 +160,12 @@
                 <option value=""></option>
             </select>
         </div>
+        <div class="form-group">
+            <label for="field_sellableInvType">sellableInvType</label>
+            <select class="form-control" id="field_sellableInvType" name="sellableInvType" ng-model="vm.marketOrder.sellableInvType" ng-options="sellableInvType as sellableInvType.id for sellableInvType in vm.sellableinvtypes track by sellableInvType.id">
+                <option value=""></option>
+            </select>
+        </div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="vm.clear()">
