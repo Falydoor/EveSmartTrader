@@ -6,7 +6,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
-import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,10 +26,6 @@ public class SellableInvType implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotNull
-    @Column(name = "sellable", nullable = false)
-    private Boolean sellable;
-
     @OneToMany(mappedBy = "sellableInvType")
     @JsonIgnore
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
@@ -42,14 +37,6 @@ public class SellableInvType implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Boolean isSellable() {
-        return sellable;
-    }
-
-    public void setSellable(Boolean sellable) {
-        this.sellable = sellable;
     }
 
     public Set<MarketOrder> getMarketOrders() {
@@ -84,7 +71,6 @@ public class SellableInvType implements Serializable {
     public String toString() {
         return "SellableInvType{" +
             "id=" + id +
-            ", sellable='" + sellable + "'" +
             '}';
     }
 }

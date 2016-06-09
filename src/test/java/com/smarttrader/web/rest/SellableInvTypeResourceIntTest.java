@@ -43,9 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class SellableInvTypeResourceIntTest {
 
 
-    private static final Boolean DEFAULT_SELLABLE = false;
-    private static final Boolean UPDATED_SELLABLE = true;
-
     @Inject
     private SellableInvTypeRepository sellableInvTypeRepository;
 
@@ -77,7 +74,6 @@ public class SellableInvTypeResourceIntTest {
     public void initTest() {
         sellableInvTypeSearchRepository.deleteAll();
         sellableInvType = new SellableInvType();
-        sellableInvType.setSellable(DEFAULT_SELLABLE);
     }
 
     @Test
@@ -96,29 +92,10 @@ public class SellableInvTypeResourceIntTest {
         List<SellableInvType> sellableInvTypes = sellableInvTypeRepository.findAll();
         assertThat(sellableInvTypes).hasSize(databaseSizeBeforeCreate + 1);
         SellableInvType testSellableInvType = sellableInvTypes.get(sellableInvTypes.size() - 1);
-        assertThat(testSellableInvType.isSellable()).isEqualTo(DEFAULT_SELLABLE);
 
         // Validate the SellableInvType in ElasticSearch
         SellableInvType sellableInvTypeEs = sellableInvTypeSearchRepository.findOne(testSellableInvType.getId());
         assertThat(sellableInvTypeEs).isEqualToComparingFieldByField(testSellableInvType);
-    }
-
-    @Test
-    @Transactional
-    public void checkSellableIsRequired() throws Exception {
-        int databaseSizeBeforeTest = sellableInvTypeRepository.findAll().size();
-        // set the field null
-        sellableInvType.setSellable(null);
-
-        // Create the SellableInvType, which fails.
-
-        restSellableInvTypeMockMvc.perform(post("/api/sellable-inv-types")
-                .contentType(TestUtil.APPLICATION_JSON_UTF8)
-                .content(TestUtil.convertObjectToJsonBytes(sellableInvType)))
-                .andExpect(status().isBadRequest());
-
-        List<SellableInvType> sellableInvTypes = sellableInvTypeRepository.findAll();
-        assertThat(sellableInvTypes).hasSize(databaseSizeBeforeTest);
     }
 
     @Test
@@ -131,8 +108,7 @@ public class SellableInvTypeResourceIntTest {
         restSellableInvTypeMockMvc.perform(get("/api/sellable-inv-types?sort=id,desc"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.[*].id").value(hasItem(sellableInvType.getId().intValue())))
-                .andExpect(jsonPath("$.[*].sellable").value(hasItem(DEFAULT_SELLABLE.booleanValue())));
+                .andExpect(jsonPath("$.[*].id").value(hasItem(sellableInvType.getId().intValue())));
     }
 
     @Test
@@ -145,8 +121,7 @@ public class SellableInvTypeResourceIntTest {
         restSellableInvTypeMockMvc.perform(get("/api/sellable-inv-types/{id}", sellableInvType.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(sellableInvType.getId().intValue()))
-            .andExpect(jsonPath("$.sellable").value(DEFAULT_SELLABLE.booleanValue()));
+            .andExpect(jsonPath("$.id").value(sellableInvType.getId().intValue()));
     }
 
     @Test
@@ -168,7 +143,6 @@ public class SellableInvTypeResourceIntTest {
         // Update the sellableInvType
         SellableInvType updatedSellableInvType = new SellableInvType();
         updatedSellableInvType.setId(sellableInvType.getId());
-        updatedSellableInvType.setSellable(UPDATED_SELLABLE);
 
         restSellableInvTypeMockMvc.perform(put("/api/sellable-inv-types")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -179,7 +153,6 @@ public class SellableInvTypeResourceIntTest {
         List<SellableInvType> sellableInvTypes = sellableInvTypeRepository.findAll();
         assertThat(sellableInvTypes).hasSize(databaseSizeBeforeUpdate);
         SellableInvType testSellableInvType = sellableInvTypes.get(sellableInvTypes.size() - 1);
-        assertThat(testSellableInvType.isSellable()).isEqualTo(UPDATED_SELLABLE);
 
         // Validate the SellableInvType in ElasticSearch
         SellableInvType sellableInvTypeEs = sellableInvTypeSearchRepository.findOne(testSellableInvType.getId());
@@ -219,7 +192,6 @@ public class SellableInvTypeResourceIntTest {
         restSellableInvTypeMockMvc.perform(get("/api/_search/sellable-inv-types?query=id:" + sellableInvType.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(sellableInvType.getId().intValue())))
-            .andExpect(jsonPath("$.[*].sellable").value(hasItem(DEFAULT_SELLABLE.booleanValue())));
+            .andExpect(jsonPath("$.[*].id").value(hasItem(sellableInvType.getId().intValue())));
     }
 }

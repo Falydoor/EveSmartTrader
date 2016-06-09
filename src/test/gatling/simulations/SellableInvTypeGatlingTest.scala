@@ -67,7 +67,7 @@ class SellableInvTypeGatlingTest extends Simulation {
             .exec(http("Create new sellableInvType")
             .post("/api/sellable-inv-types")
             .headers(headers_http_authenticated)
-            .body(StringBody("""{"id":null, "sellable":null}""")).asJSON
+            .body(StringBody("""{"id":null}""")).asJSON
             .check(status.is(201))
             .check(headerRegex("Location", "(.*)").saveAs("new_sellableInvType_url"))).exitHereIfFailed
             .pause(10)

@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
-import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -53,7 +52,7 @@ public class SellableInvTypeResource {
         method = RequestMethod.POST,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<SellableInvType> createSellableInvType(@Valid @RequestBody SellableInvType sellableInvType) throws URISyntaxException {
+    public ResponseEntity<SellableInvType> createSellableInvType(@RequestBody SellableInvType sellableInvType) throws URISyntaxException {
         log.debug("REST request to save SellableInvType : {}", sellableInvType);
         if (sellableInvType.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("sellableInvType", "idexists", "A new sellableInvType cannot already have an ID")).body(null);
@@ -78,7 +77,7 @@ public class SellableInvTypeResource {
         method = RequestMethod.PUT,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<SellableInvType> updateSellableInvType(@Valid @RequestBody SellableInvType sellableInvType) throws URISyntaxException {
+    public ResponseEntity<SellableInvType> updateSellableInvType(@RequestBody SellableInvType sellableInvType) throws URISyntaxException {
         log.debug("REST request to update SellableInvType : {}", sellableInvType);
         if (sellableInvType.getId() == null) {
             return createSellableInvType(sellableInvType);

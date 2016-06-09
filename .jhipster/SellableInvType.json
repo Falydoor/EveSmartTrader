@@ -8,15 +8,7 @@
             "otherEntityRelationshipName": "sellableInvType"
         }
     ],
-    "fields": [
-        {
-            "fieldName": "sellable",
-            "fieldType": "Boolean",
-            "fieldValidateRules": [
-                "required"
-            ]
-        }
-    ],
+    "fields": [],
     "changelogDate": "20160609015100",
     "dto": "no",
     "service": "no",

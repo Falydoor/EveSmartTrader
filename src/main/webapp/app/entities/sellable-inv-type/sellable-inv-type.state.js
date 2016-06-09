@@ -82,7 +82,6 @@
                     resolve: {
                         entity: function () {
                             return {
-                                sellable: false,
                                 id: null
                             };
                         }
