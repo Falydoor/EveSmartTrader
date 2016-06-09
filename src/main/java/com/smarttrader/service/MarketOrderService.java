@@ -2,6 +2,7 @@ package com.smarttrader.service;
 
 import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.MarketOrder;
+import com.smarttrader.domain.enums.Region;
 import com.smarttrader.repository.MarketOrderRepository;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -12,12 +13,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,12 +39,15 @@ public class MarketOrderService {
     @Inject
     private MarketOrderRepository marketOrderRepository;
 
+    @Scheduled(cron = "0 0/30 * * * ?")
     public void retrieveMarketOrders() {
         // Delete old market orders
         marketOrderRepository.deleteAll();
         marketOrderRepository.flush();
 
-        retrieveMarketOrders("https://crest-tq.eveonline.com/market/10000002/orders/all/");
+        Arrays.stream(Region.values()).forEach(region -> {
+            retrieveMarketOrders("https://crest-tq.eveonline.com/market/" + region + "/orders/all/");
+        });
     }
 
     private void retrieveMarketOrders(String url) {
@@ -49,8 +55,8 @@ public class MarketOrderService {
         try {
             HttpClientBuilder client = HttpClientBuilder.create();
             HttpGet request = new HttpGet(url);
-            CloseableHttpResponse shortUrlResponse = client.build().execute(request);
-            JSONObject jsonObject = new JSONObject(IOUtils.toString(shortUrlResponse.getEntity().getContent()));
+            CloseableHttpResponse response = client.build().execute(request);
+            JSONObject jsonObject = new JSONObject(IOUtils.toString(response.getEntity().getContent()));
 
             // Save all market orders
             Set<MarketOrder> marketOrders = new HashSet<>();
