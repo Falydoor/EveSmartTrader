@@ -46,7 +46,7 @@ public class MarketOrderService {
         marketOrderRepository.flush();
 
         Arrays.stream(Region.values()).forEach(region -> {
-            retrieveMarketOrders("https://crest-tq.eveonline.com/market/" + region + "/orders/all/");
+            retrieveMarketOrders("https://crest-tq.eveonline.com/market/" + region.getId() + "/orders/all/");
         });
     }
 
