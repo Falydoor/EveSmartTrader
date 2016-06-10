@@ -14,6 +14,11 @@
             vm.hubTrades = trades;
             vm.hubTradesSize = trades.length;
         });
+        vm.showPenuryTrades = false;
+        Trade.penuryTrades({}, function (trades) {
+            vm.penuryTrades = trades;
+            vm.penuryTradesSize = trades.length;
+        });
         vm.copy = function (name) {
             clipboard.copyText(name);
         };

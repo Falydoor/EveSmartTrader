@@ -10,7 +10,8 @@
         var resourceUrl = 'api/trades';
 
         return $resource(resourceUrl, {}, {
-            'hubTrades': {method: 'GET', isArray: true, url: 'api/hubTrades'}
+            'hubTrades': {method: 'GET', isArray: true, url: 'api/hubTrades'},
+            'penuryTrades': {method: 'GET', isArray: true, url: 'api/penuryTrades'}
         });
     }
 })();

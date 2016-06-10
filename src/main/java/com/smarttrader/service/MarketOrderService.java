@@ -139,4 +139,25 @@ public class MarketOrderService {
         return new JSONArray(trades);
     }
 
+    public JSONArray buildPenuryTrades() {
+        Station penuryStation = Station.JitaHUB;
+
+        List<TradeDTO> trades = new ArrayList<>();
+
+        sellableInvTypeRepository.findAll().stream().filter(sellableInvType -> sellableInvType.getMarketOrders().stream()
+            .filter(marketOrder -> !marketOrder.isBuy())
+            .noneMatch(marketOrder -> marketOrder.getStationID().equals(penuryStation.getId())))
+            .forEach(sellableInvType -> {
+                InvType invType = invTypeRepository.getOne(sellableInvType.getId());
+                TradeDTO trade = new TradeDTO();
+                trade.setTypeId(sellableInvType.getId());
+                trade.setName(invType.getTypeName());
+                trade.setGroupName(Referential.GroupParentNameByTypeId.get(invType.getId()));
+                trade.setStation(penuryStation.toString());
+                trade.setTotalVolume(invType.getVolume().longValue());
+                trades.add(trade);
+            });
+
+        return new JSONArray(trades);
+    }
 }
