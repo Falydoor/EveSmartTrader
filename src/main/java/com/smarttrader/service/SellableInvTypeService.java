@@ -2,6 +2,7 @@ package com.smarttrader.service;
 
 import com.smarttrader.domain.InvMarketGroup;
 import com.smarttrader.domain.InvType;
+import com.smarttrader.domain.Referential;
 import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.enums.Region;
 import com.smarttrader.repository.InvMarketGroupRepository;
@@ -22,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,8 +52,6 @@ public class SellableInvTypeService {
         sellableInvTypeRepository.deleteAllInBatch();
         sellableInvTypeRepository.flush();
 
-        List<Long> sellableGroup = Arrays.asList(9L, 24L, 150L, 157L, 955L);
-
         Set<SellableInvType> sellableInvTypes = new HashSet<>();
         HttpClientBuilder client = HttpClientBuilder.create();
         List<InvType> invTypes = invTypeRepository.findByInvMarketGroupNotNull().parallelStream().filter(invType -> {
@@ -64,7 +62,7 @@ public class SellableInvTypeService {
                 mainParentGroupID = parentGroupID;
                 parentGroupID = invMarketGroup.getParentGroupID();
             }
-            return sellableGroup.contains(mainParentGroupID) && invType.getVolume() <= 1000;
+            return Referential.sellables.contains(mainParentGroupID) && invType.getVolume() <= 1000;
         }).collect(Collectors.toList());
         int[] index = {0};
         double[] percent = {-1};
