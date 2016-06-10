@@ -2,7 +2,11 @@ package com.smarttrader;
 
 import com.smarttrader.config.Constants;
 import com.smarttrader.config.JHipsterProperties;
-import com.smarttrader.service.MarketOrderService;
+import com.smarttrader.domain.InvMarketGroup;
+import com.smarttrader.domain.InvType;
+import com.smarttrader.domain.Referential;
+import com.smarttrader.repository.InvMarketGroupRepository;
+import com.smarttrader.repository.InvTypeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -21,6 +25,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 @ComponentScan
 @EnableAutoConfiguration(exclude = {MetricFilterAutoConfiguration.class, MetricRepositoryAutoConfiguration.class})
@@ -33,7 +38,10 @@ public class EveSmartTraderApp {
     private Environment env;
 
     @Inject
-    private MarketOrderService marketOrderService;
+    private InvTypeRepository invTypeRepository;
+
+    @Inject
+    private InvMarketGroupRepository invMarketGroupRepository;
 
     /**
      * Initializes EveSmartTrader.
@@ -58,6 +66,17 @@ public class EveSmartTraderApp {
                     "It should not run with both the 'dev' and 'cloud' profiles at the same time.");
             }
         }
+
+        Referential.GroupParentNameByTypeId = invTypeRepository.findByInvMarketGroupNotNull().stream().collect(Collectors.toMap(InvType::getId, invType -> {
+            String mainParentName = invType.getInvMarketGroup().getMarketGroupName();
+            Long parentGroupID = invType.getInvMarketGroup().getParentGroupID();
+            while (parentGroupID != null) {
+                InvMarketGroup invMarketGroup = invMarketGroupRepository.findOne(parentGroupID);
+                mainParentName = invMarketGroup.getMarketGroupName();
+                parentGroupID = invMarketGroup.getParentGroupID();
+            }
+            return mainParentName;
+        }));
     }
 
     /**
