@@ -7,17 +7,10 @@
     Trade.$inject = ['$resource'];
 
     function Trade($resource) {
-        var resourceUrl = 'api/trades/:id';
+        var resourceUrl = 'api/trades';
 
         return $resource(resourceUrl, {}, {
-            'query': {method: 'GET', isArray: true},
-            'get': {
-                method: 'GET',
-                transformResponse: function (data) {
-                    data = angular.fromJson(data);
-                    return data;
-                }
-            }
+            'hubTrades': {method: 'GET', isArray: true, url: 'api/hubTrades'}
         });
     }
 })();

@@ -9,7 +9,11 @@
 
     function TradeController($scope, $state, Trade, clipboard) {
         var vm = this;
-        vm.trades = Trade.query();
+        vm.showHubTrades = true;
+        Trade.hubTrades({}, function (trades) {
+            vm.hubTrades = trades;
+            vm.hubTradesSize = trades.length;
+        });
         vm.copy = function (name) {
             clipboard.copyText(name);
         };

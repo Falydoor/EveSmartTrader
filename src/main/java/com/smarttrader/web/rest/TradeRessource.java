@@ -28,12 +28,12 @@ public class TradeRessource {
     @Inject
     private MarketOrderService marketOrderService;
 
-    @RequestMapping(value = "/trades",
+    @RequestMapping(value = "/hubTrades",
         method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Transactional(readOnly = true)
-    public ResponseEntity<JSONArray> getAllTrades()
+    public ResponseEntity<JSONArray> getHubTrades()
         throws URISyntaxException {
         return new ResponseEntity<>(marketOrderService.buildHubTrades(), HttpStatus.OK);
     }

@@ -1,6 +1,10 @@
 <div>
-    <h2>Hub Trades</h2>
-    <table class="table">
+    <h2 ng-click="vm.showHubTrades = !vm.showHubTrades" class="pointer">{{vm.hubTradesSize ? vm.hubTradesSize + ' ' :
+        'Loading '}}Hub
+        Trades
+        {{vm.showHubTrades ? '' : '(hided)'}}
+    </h2>
+    <table ng-show="vm.showHubTrades" class="table">
         <thead>
         <tr>
             <th>PROFIT (TOTAL)</th>
@@ -15,7 +19,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="trade in vm.trades">
+        <tr ng-repeat="trade in vm.hubTrades">
             <td><span class="label label-info">{{trade.totalProfit | number}} ISK</span></td>
             <td><span class="label label-primary">{{trade.profit | number}} ISK</span></td>
             <td><span class="label label-success">{{trade.percentProfit}} %</span></td>
@@ -23,7 +27,7 @@
             <td>
                 <span>
                     <button ng-click="vm.copy(trade.name)" type="button" class="btn btn-default btn-xs">
-                        <span class="glyphicon glyphicon-duplicate"></span>
+                        <span class="glyphicon glyphicon-copy"></span>
                     </button>
                     {{trade.name}}
                 </span>
