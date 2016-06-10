@@ -1,0 +1,43 @@
+<div>
+    <h2>Hub Trades</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>PROFIT (TOTAL)</th>
+            <th>PROFIT (UNIT)</th>
+            <th>PROFIT (%)</th>
+            <th>TYPE</th>
+            <th>NAME</th>
+            <th>LINKS</th>
+            <th>PRICE</th>
+            <th>STATION</th>
+            <th>QUANTITY</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="trade in vm.trades">
+            <td><span class="label label-info">{{trade.totalProfit | number}} ISK</span></td>
+            <td><span class="label label-primary">{{trade.profit | number}} ISK</span></td>
+            <td><span class="label label-success">{{trade.percentProfit}} %</span></td>
+            <td><span class="label label-warning">{{trade.groupName}}</span></td>
+            <td>
+                <span>
+                    <button ng-click="vm.copy(trade.name)" type="button" class="btn btn-default btn-xs">
+                        <span class="glyphicon glyphicon-duplicate"></span>
+                    </button>
+                    {{trade.name}}
+                </span>
+            </td>
+            <td>
+                <a href=" http://eve-central.com/home/quicklook.html?typeid={{trade.typeID}}"
+                   target="_blank">EC</a>&nbsp;/&nbsp;<a
+                href="http://eve-marketdata.com/price_check.php?step=Show&type_id={{trade.typeID}}&region_id={{hub.station.region.id}}&type=history"
+                target="_blank">MD</a>
+            </td>
+            <td><span class="label label-info">{{trade.sellPrice | number}} ISK</span></td>
+            <td><span class="label label-primary">{{trade.station}}</span></td>
+            <td><span class="label label-success">{{trade.totalQuantity}} ({{trade.totalVolume}}m3)</span></td>
+        </tr>
+        </tbody>
+    </table>
+</div>

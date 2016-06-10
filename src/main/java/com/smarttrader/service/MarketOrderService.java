@@ -9,6 +9,7 @@ import com.smarttrader.domain.enums.Station;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
+import com.smarttrader.service.dto.TradeDTO;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -93,6 +94,49 @@ public class MarketOrderService {
         } catch (JSONException e) {
             log.error("Error parsing market orders", e);
         }
+    }
+
+    public JSONArray buildHubTrades() {
+        Station sellStation = Station.AmarrHUB;
+        Station buyStation = Station.JitaHUB;
+
+        List<TradeDTO> trades = new ArrayList<>();
+
+        sellableInvTypeRepository.findAll().forEach(sellableInvType -> {
+            List<MarketOrder> sortedMarketOrders = sellableInvType.getMarketOrders()
+                .stream()
+                .filter(marketOrder -> !marketOrder.isBuy() && !Referential.GroupParentNameByTypeId.get(marketOrder.getInvType().getId()).equals("Skills"))
+                .sorted((mo1, mo2) -> mo1.getPrice().compareTo(mo2.getPrice()))
+                .collect(Collectors.toList());
+
+            List<MarketOrder> sellers = sortedMarketOrders.stream().filter(marketOrder -> marketOrder.getStationID().equals(sellStation.getId())).collect(Collectors.toList());
+            Optional<MarketOrder> cheapestSell = Optional.ofNullable(sellers.isEmpty() ? null : sellers.get(0));
+            Optional<MarketOrder> cheapestBuy = sortedMarketOrders.stream().filter(marketOrder -> marketOrder.getStationID().equals(buyStation.getId())).findFirst();
+
+            if (cheapestSell.isPresent() && cheapestBuy.isPresent() && cheapestSell.get().getPrice() < cheapestBuy.get().getPrice()) {
+                Double cheapestSellPrice = cheapestSell.get().getPrice();
+                Double cheapestBuyPrice = cheapestBuy.get().getPrice();
+                InvType invType = cheapestSell.get().getInvType();
+                Double thresholdPrice = cheapestSellPrice * 1.1;
+                List<MarketOrder> sellables = sellers.stream().filter(marketOrder -> marketOrder.getPrice() <= thresholdPrice && marketOrder.getPrice() < cheapestBuyPrice).collect(Collectors.toList());
+                TradeDTO trade = new TradeDTO();
+                trade.setTotalPrice(Double.valueOf(sellables.stream().mapToDouble(MarketOrder::getPrice).sum()).longValue());
+                trade.setTotalProfit(Double.valueOf(sellables.stream().mapToDouble(value -> cheapestBuyPrice - value.getPrice()).sum()).longValue());
+                trade.setTotalQuantity(sellables.stream().mapToLong(MarketOrder::getVolume).sum());
+                trade.setTotalVolume(Double.valueOf(sellables.stream().mapToDouble(value -> value.getInvType().getVolume()).sum()).longValue());
+                trade.setSellPrice(cheapestBuyPrice.longValue());
+                trade.setPercentProfit(100 * trade.getTotalProfit() / trade.getTotalPrice());
+                trade.setProfit(Double.valueOf(cheapestBuyPrice - cheapestSellPrice).longValue());
+                trade.setName(invType.getTypeName());
+                trade.setGroupName(Referential.GroupParentNameByTypeId.get(invType.getId()));
+                trade.setStation(sellStation.toString());
+                trades.add(trade);
+            }
+        });
+
+        trades.sort((t1, t2) -> t2.getPercentProfit().compareTo(t1.getPercentProfit()));
+
+        return new JSONArray(trades);
     }
 
 }
