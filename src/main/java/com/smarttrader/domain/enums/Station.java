@@ -43,7 +43,7 @@ public enum Station {
         this.stationId = stationId;
     }
 
-    long getId() {
+    public long getId() {
         return this.stationId;
     }
 }

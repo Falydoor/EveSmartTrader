@@ -1,6 +1,8 @@
 package com.smarttrader.service;
 
+import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.MarketOrder;
+import com.smarttrader.domain.Referential;
 import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.enums.Region;
 import com.smarttrader.domain.enums.Station;
@@ -22,10 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Service class for managing market orders.
@@ -53,9 +53,8 @@ public class MarketOrderService {
 
         List<SellableInvType> sellableInvTypes = sellableInvTypeRepository.findAll();
 
-        Arrays.stream(Region.values()).parallel().forEach(region -> {
-            retrieveMarketOrders(region, sellableInvTypes, "https://crest-tq.eveonline.com/market/" + region.getId() + "/orders/all/", 1);
-        });
+        Arrays.stream(Region.values()).parallel()
+            .forEach(region -> retrieveMarketOrders(region, sellableInvTypes, "https://crest-tq.eveonline.com/market/" + region.getId() + "/orders/all/", 1));
         marketOrderRepository.flush();
     }
 
