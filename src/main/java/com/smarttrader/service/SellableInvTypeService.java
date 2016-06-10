@@ -66,7 +66,8 @@ public class SellableInvTypeService {
             }
             return sellableGroup.contains(mainParentGroupID) && invType.getVolume() <= 1000;
         }).collect(Collectors.toList());
-        int[] k = {0};
+        int[] index = {0};
+        double[] percent = {-1};
         invTypes.parallelStream().forEach(invType -> {
             try {
                 int j = 0;
@@ -87,9 +88,11 @@ public class SellableInvTypeService {
                         break;
                     }
                 }
-                ++k[0];
-                if (k[0] % 100 == 0 || k[0] == invTypes.size()) {
-                    log.info("Sellable count : {}/{}", k[0], invTypes.size());
+                ++index[0];
+                double tempPercent = Math.floor(100 * index[0] / invTypes.size());
+                if (tempPercent != percent[0]) {
+                    percent[0] = tempPercent;
+                    log.info("Sellable progress : {}%", percent[0]);
                 }
             } catch (IOException e) {
                 log.error("Error getting sellable inv types from URL", e);
