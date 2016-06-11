@@ -5,9 +5,9 @@
         .module('eveSmartTraderApp')
         .controller('SellableInvTypeDetailController', SellableInvTypeDetailController);
 
-    SellableInvTypeDetailController.$inject = ['$scope', '$rootScope', '$stateParams', 'entity', 'SellableInvType', 'MarketOrder'];
+    SellableInvTypeDetailController.$inject = ['$scope', '$rootScope', '$stateParams', 'entity', 'SellableInvType', 'MarketOrder', 'InvType'];
 
-    function SellableInvTypeDetailController($scope, $rootScope, $stateParams, entity, SellableInvType, MarketOrder) {
+    function SellableInvTypeDetailController($scope, $rootScope, $stateParams, entity, SellableInvType, MarketOrder, InvType) {
         var vm = this;
         vm.sellableInvType = entity;
         vm.load = function (id) {

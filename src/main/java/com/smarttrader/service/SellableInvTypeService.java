@@ -70,7 +70,7 @@ public class SellableInvTypeService {
             try {
                 int j = 0;
                 SellableInvType sellableInvType = new SellableInvType();
-                sellableInvType.setId(invType.getId());
+                sellableInvType.setInvType(invType);
                 String url = "https://crest-tq.eveonline.com/market/" + Region.THE_FORGE.getId() + "/types/" + invType.getId() + "/history/";
                 HttpGet request = new HttpGet(url);
                 CloseableHttpResponse response = client.build().execute(request);

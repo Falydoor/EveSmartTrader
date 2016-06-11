@@ -21,8 +21,15 @@
             <column name="id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+            <column name="inv_type_id" type="bigint"/>
             <!-- jhipster-needle-liquibase-add-column - Jhipster will add columns here, do not remove-->
         </createTable>
         
+        <addForeignKeyConstraint baseColumnNames="inv_type_id"
+                                 baseTableName="sellable_inv_type"
+                                 constraintName="fk_sellableinvtype_invtype_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="inv_type"/>
+
     </changeSet>
 </databaseChangeLog>

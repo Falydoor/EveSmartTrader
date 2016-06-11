@@ -52,14 +52,15 @@ public class MarketOrderService {
         marketOrderRepository.deleteAllInBatch();
         marketOrderRepository.flush();
 
-        List<SellableInvType> sellableInvTypes = sellableInvTypeRepository.findAll();
+        Map<Long, SellableInvType> sellableByTypeId = sellableInvTypeRepository.findAll().stream()
+            .collect(Collectors.toMap(sellableInvType -> sellableInvType.getInvType().getId(), sellableInvType -> sellableInvType));
 
         Arrays.stream(Region.values()).parallel()
-            .forEach(region -> retrieveMarketOrders(region, sellableInvTypes, "https://crest-tq.eveonline.com/market/" + region.getId() + "/orders/all/", 1));
+            .forEach(region -> retrieveMarketOrders(region, sellableByTypeId, "https://crest-tq.eveonline.com/market/" + region.getId() + "/orders/all/", 1));
         marketOrderRepository.flush();
     }
 
-    private void retrieveMarketOrders(Region region, List<SellableInvType> sellableInvTypes, String url, int page) {
+    private void retrieveMarketOrders(Region region, Map<Long, SellableInvType> sellableByTypeId, String url, int page) {
         try {
             HttpClientBuilder client = HttpClientBuilder.create();
             HttpGet request = new HttpGet(url);
@@ -72,13 +73,12 @@ public class MarketOrderService {
             for (int i = 0; i < items.length(); i++) {
                 JSONObject item = items.optJSONObject(i);
                 long typeID = item.getLong("type");
-                SellableInvType sellableInvType = new SellableInvType();
-                sellableInvType.setId(typeID);
-                if (!sellableInvTypes.contains(sellableInvType) || Station.fromLong(item.getLong("stationID")) != Station.getStationWithRegion(region)) {
+                SellableInvType sellableInvType = sellableByTypeId.get(typeID);
+                if (sellableInvType == null || Station.fromLong(item.getLong("stationID")) != Station.getStationWithRegion(region)) {
                     continue;
                 }
                 MarketOrder marketOrder = new MarketOrder(item);
-                marketOrder.setSellableInvType(sellableInvTypeRepository.getOne(typeID));
+                marketOrder.setSellableInvType(sellableInvType);
                 marketOrder.setInvType(invTypeRepository.getOne(typeID));
                 marketOrders.add(marketOrder);
             }
@@ -87,7 +87,7 @@ public class MarketOrderService {
 
             // Retrieve next page
             if (!jsonObject.isNull("next")) {
-                retrieveMarketOrders(region, sellableInvTypes, jsonObject.getJSONObject("next").getString("href"), ++page);
+                retrieveMarketOrders(region, sellableByTypeId, jsonObject.getJSONObject("next").getString("href"), ++page);
             }
         } catch (IOException e) {
             log.error("Error getting market orders from URL", e);

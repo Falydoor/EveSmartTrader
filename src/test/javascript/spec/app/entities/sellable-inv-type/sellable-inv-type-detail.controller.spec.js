@@ -4,7 +4,7 @@ describe('Controller Tests', function() {
 
     describe('SellableInvType Management Detail Controller', function() {
         var $scope, $rootScope;
-        var MockEntity, MockSellableInvType, MockMarketOrder;
+        var MockEntity, MockSellableInvType, MockMarketOrder, MockInvType;
         var createController;
 
         beforeEach(inject(function($injector) {
@@ -13,6 +13,7 @@ describe('Controller Tests', function() {
             MockEntity = jasmine.createSpy('MockEntity');
             MockSellableInvType = jasmine.createSpy('MockSellableInvType');
             MockMarketOrder = jasmine.createSpy('MockMarketOrder');
+            MockInvType = jasmine.createSpy('MockInvType');
             
 
             var locals = {
@@ -20,7 +21,8 @@ describe('Controller Tests', function() {
                 '$rootScope': $rootScope,
                 'entity': MockEntity ,
                 'SellableInvType': MockSellableInvType,
-                'MarketOrder': MockMarketOrder
+                'MarketOrder': MockMarketOrder,
+                'InvType': MockInvType
             };
             createController = function() {
                 $injector.get('$controller')("SellableInvTypeDetailController", locals);

@@ -6,6 +6,12 @@
             "relationshipType": "one-to-many",
             "otherEntityField": "invType",
             "otherEntityRelationshipName": "sellableInvType"
+        },
+        {
+            "relationshipName": "invType",
+            "otherEntityName": "invType",
+            "relationshipType": "many-to-one",
+            "otherEntityField": "typeName"
         }
     ],
     "fields": [],

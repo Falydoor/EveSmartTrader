@@ -23,12 +23,16 @@ public class SellableInvType implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @OneToMany(mappedBy = "sellableInvType")
     @JsonIgnore
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<MarketOrder> marketOrders = new HashSet<>();
+
+    @ManyToOne
+    private InvType invType;
 
     public Long getId() {
         return id;
@@ -44,6 +48,14 @@ public class SellableInvType implements Serializable {
 
     public void setMarketOrders(Set<MarketOrder> marketOrders) {
         this.marketOrders = marketOrders;
+    }
+
+    public InvType getInvType() {
+        return invType;
+    }
+
+    public void setInvType(InvType invType) {
+        this.invType = invType;
     }
 
     @Override

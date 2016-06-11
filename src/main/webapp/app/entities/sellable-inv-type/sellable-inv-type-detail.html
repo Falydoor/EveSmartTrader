@@ -3,6 +3,11 @@
     <h2><span>SellableInvType</span> {{vm.sellableInvType.id}}</h2>
     <hr>
     <dl class="dl-horizontal">
+        <dt><span>invType</span></dt>
+        <dd>
+            <a ui-sref="inv-type-detail({id:vm.sellableInvType.invType.id})">{{vm.sellableInvType.invType.typeName}}</a>
+        </dd>
+        <hr>
     </dl>
 
     <button type="submit"

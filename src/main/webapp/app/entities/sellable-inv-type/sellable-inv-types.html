@@ -36,12 +36,16 @@
             <thead>
                 <tr jh-sort="vm.predicate" ascending="vm.reverse" callback="vm.transition()">
                     <th jh-sort-by="id"><span>ID</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="invType.typeName"><span>invType</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="sellableInvType in vm.sellableInvTypes track by sellableInvType.id">
                     <td><a ui-sref="sellable-inv-type-detail({id:sellableInvType.id})">{{sellableInvType.id}}</a></td>
+                    <td>
+                        <a ui-sref="inv-type-detail({id:sellableInvType.invType.id})">{{sellableInvType.invType.typeName}}</a>
+                    </td>
                     <td class="text-right">
                         <div class="btn-group flex-btn-group-container">
                             <button type="submit"
