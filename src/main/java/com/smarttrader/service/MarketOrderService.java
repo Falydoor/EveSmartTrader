@@ -67,14 +67,16 @@ public class MarketOrderService {
         Map<Long, SellableInvType> sellableByTypeId = sellableInvTypeRepository.findAll().stream()
             .collect(Collectors.toMap(sellableInvType -> sellableInvType.getInvType().getId(), sellableInvType -> sellableInvType));
 
+        Set<MarketOrder> marketOrders = new HashSet<>();
         Arrays.stream(Region.values()).parallel()
-            .forEach(region -> retrieveMarketOrders(region, sellableByTypeId, "https://crest-tq.eveonline.com/market/" + region.getId() + "/orders/all/", 1));
+            .forEach(region -> retrieveMarketOrders(marketOrders, region, sellableByTypeId, "https://crest-tq.eveonline.com/market/" + region.getId() + "/orders/all/", 1));
+        marketOrderRepository.save(marketOrders);
         marketOrderRepository.flush();
         stopWatch.stop();
         log.info("Retrieved market orders in {}ms", stopWatch.getTime());
     }
 
-    private void retrieveMarketOrders(Region region, Map<Long, SellableInvType> sellableByTypeId, String url, int page) {
+    private void retrieveMarketOrders(Set<MarketOrder> marketOrders, Region region, Map<Long, SellableInvType> sellableByTypeId, String url, int page) {
         try {
             HttpClientBuilder client = HttpClientBuilder.create();
             HttpGet request = new HttpGet(url);
@@ -82,7 +84,6 @@ public class MarketOrderService {
             JSONObject jsonObject = new JSONObject(IOUtils.toString(response.getEntity().getContent()));
 
             // Save all market orders that are sellable
-            Set<MarketOrder> marketOrders = new HashSet<>();
             JSONArray items = jsonObject.getJSONArray("items");
             for (int i = 0; i < items.length(); i++) {
                 JSONObject item = items.optJSONObject(i);
@@ -96,12 +97,11 @@ public class MarketOrderService {
                 marketOrder.setInvType(invTypeRepository.getOne(typeID));
                 marketOrders.add(marketOrder);
             }
-            marketOrderRepository.save(marketOrders);
             log.info("Market orders {}'s pages : {}/{}", region, page, jsonObject.getInt("pageCount"));
 
             // Retrieve next page
             if (!jsonObject.isNull("next")) {
-                retrieveMarketOrders(region, sellableByTypeId, jsonObject.getJSONObject("next").getString("href"), ++page);
+                retrieveMarketOrders(marketOrders, region, sellableByTypeId, jsonObject.getJSONObject("next").getString("href"), ++page);
             }
         } catch (IOException e) {
             log.error("Error getting market orders from URL", e);
