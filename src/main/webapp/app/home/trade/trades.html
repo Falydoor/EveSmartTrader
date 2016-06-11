@@ -5,11 +5,11 @@
         Trades
         {{vm.showPenuryTrades ? '' : '(hided)'}}
     </h2>
-    <table ng-show="vm.showPenuryTrades" class="table">
+    <table ng-show="vm.penuryTradesSize > 0 || vm.showPenuryTrades" class="table">
         <thead>
         <tr>
             <th>TYPE</th>
-            <th>NOM</th>
+            <th>NAME</th>
             <th>LINKS</th>
             <th>STATION</th>
             <th>VOLUME</th>
@@ -34,6 +34,46 @@
             </td>
             <td><span class="label label-primary">{{trade.station}}</span></td>
             <td><span class="label label-success">{{trade.totalVolume}}m3</span></td>
+        </tr>
+        </tbody>
+    </table>
+    <h2 ng-click="vm.showStationTrades = !vm.showStationTrades" class="pointer">{{vm.stationTradesSize !== undefined ?
+        vm.stationTradesSize + ' ' :
+        'Loading '}}Station
+        Trades
+        {{vm.showStationTrades ? '' : '(hided)'}}
+    </h2>
+    <table ng-show="vm.showStationTrades" class="table">
+        <thead>
+        <tr>
+            <th>PROFIT (UNIT)</th>
+            <th>SELL PRICE</th>
+            <th>PROFIT (%)</th>
+            <th>TYPE</th>
+            <th>NAME</th>
+            <th>LINKS</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="trade in vm.stationTrades">
+            <td><span class="label label-info">{{trade.profit | number}} ISK</span></td>
+            <td><span class="label label-primary">{{trade.sellPrice | number}} ISK</span></td>
+            <td><span class="label label-success">{{trade.percentProfit}} %</span></td>
+            <td><span class="label label-warning">{{trade.groupName}}</span></td>
+            <td>
+                <span>
+                    <button ng-click="vm.copy(trade.name)" type="button" class="btn btn-default btn-xs">
+                        <span class="glyphicon glyphicon-copy"></span>
+                    </button>
+                    {{trade.name}}
+                </span>
+            </td>
+            <td>
+                <a href="http://eve-central.com/home/quicklook.html?typeid={{trade.typeId}}"
+                   target="_blank">EC</a>&nbsp;/&nbsp;<a
+                href="http://eve-marketdata.com/price_check.php?step=Show&type_id={{trade.typeId}}&region_id={{hub.station.region.id}}&type=history"
+                target="_blank">MD</a>
+            </td>
         </tr>
         </tbody>
     </table>

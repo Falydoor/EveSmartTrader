@@ -19,6 +19,11 @@
             vm.penuryTrades = trades;
             vm.penuryTradesSize = trades.length;
         });
+        vm.showStationTrades = false;
+        Trade.stationTrades({}, function (trades) {
+            vm.stationTrades = trades;
+            vm.stationTradesSize = trades.length;
+        });
         vm.copy = function (name) {
             clipboard.copyText(name);
         };

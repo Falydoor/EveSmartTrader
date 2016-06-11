@@ -48,4 +48,14 @@ public class TradeRessource {
         return new ResponseEntity<>(marketOrderService.buildPenuryTrades(), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/stationTrades",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    @Transactional(readOnly = true)
+    public ResponseEntity<JSONArray> getStationTrades()
+        throws URISyntaxException {
+        return new ResponseEntity<>(marketOrderService.buildStationTrades(), HttpStatus.OK);
+    }
+
 }

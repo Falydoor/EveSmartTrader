@@ -11,7 +11,8 @@
 
         return $resource(resourceUrl, {}, {
             'hubTrades': {method: 'GET', isArray: true, url: 'api/hubTrades'},
-            'penuryTrades': {method: 'GET', isArray: true, url: 'api/penuryTrades'}
+            'penuryTrades': {method: 'GET', isArray: true, url: 'api/penuryTrades'},
+            'stationTrades': {method: 'GET', isArray: true, url: 'api/stationTrades'}
         });
     }
 })();

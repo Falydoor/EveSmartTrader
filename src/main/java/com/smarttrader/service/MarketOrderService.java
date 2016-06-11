@@ -130,6 +130,7 @@ public class MarketOrderService {
                 trade.setName(invType.getTypeName());
                 trade.setGroupName(Referential.GroupParentNameByTypeId.get(invType.getId()));
                 trade.setStation(sellStation.toString());
+                trade.setTypeId(invType.getId());
                 trades.add(trade);
             }
         });
@@ -159,5 +160,52 @@ public class MarketOrderService {
             });
 
         return new JSONArray(trades);
+    }
+
+    public JSONArray buildStationTrades() {
+        Station stationTrade = Station.JitaHUB;
+
+        List<TradeDTO> trades = new ArrayList<>();
+
+        sellableInvTypeRepository.findAll().forEach(sellableInvType -> {
+            List<MarketOrder> hubMarketOrders = sellableInvType.getMarketOrders()
+                .stream()
+                .filter(marketOrder -> marketOrder.getStationID().equals(stationTrade.getId()) && excludeMarketGroups(marketOrder))
+                .collect(Collectors.toList());
+
+            Optional<MarketOrder> cheapestSellOrder = hubMarketOrders
+                .stream()
+                .filter(marketOrder -> !marketOrder.isBuy())
+                .sorted((mo1, mo2) -> mo1.getPrice().compareTo(mo2.getPrice()))
+                .findFirst();
+
+            Optional<MarketOrder> costliestBuyOrder = hubMarketOrders
+                .stream()
+                .filter(MarketOrder::isBuy)
+                .sorted((mo1, mo2) -> mo2.getPrice().compareTo(mo1.getPrice()))
+                .findFirst();
+
+            if (cheapestSellOrder.isPresent() && costliestBuyOrder.isPresent()) {
+                InvType invType = invTypeRepository.getOne(sellableInvType.getId());
+                TradeDTO trade = new TradeDTO();
+                trade.setProfit(Double.valueOf(cheapestSellOrder.get().getPrice() - costliestBuyOrder.get().getPrice()).longValue());
+                trade.setSellPrice(costliestBuyOrder.get().getPrice().longValue());
+                trade.setPercentProfit(100 * trade.getProfit() / trade.getSellPrice());
+                if (trade.getPercentProfit() >= 10) {
+                    trade.setName(invType.getTypeName());
+                    trade.setGroupName(Referential.GroupParentNameByTypeId.get(invType.getId()));
+                    trade.setTypeId(invType.getId());
+                    trades.add(trade);
+                }
+            }
+        });
+
+        trades.sort((t1, t2) -> t2.getProfit().compareTo(t1.getProfit()));
+
+        return new JSONArray(trades);
+    }
+
+    private boolean excludeMarketGroups(MarketOrder marketOrder) {
+        return !Referential.GroupParentNameByTypeId.get(marketOrder.getInvType().getId()).equals("Skills");
     }
 }
