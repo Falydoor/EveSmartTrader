@@ -1,4 +1,7 @@
 <div>
+    <button ng-click="vm.refresh()" type="button" class="btn btn-default btn-lg">
+        <span class="glyphicon glyphicon-refresh"></span>
+    </button>
     <h2 ng-click="vm.showPenuryTrades = !vm.showPenuryTrades" class="pointer">{{vm.penuryTradesSize !== undefined ?
         vm.penuryTradesSize + ' ' :
         'Loading '}}Penury

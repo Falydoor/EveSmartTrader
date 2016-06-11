@@ -27,5 +27,8 @@
         vm.copy = function (name) {
             clipboard.copyText(name);
         };
+        vm.refresh = function () {
+            $state.reload();
+        };
     }
 })();
