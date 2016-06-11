@@ -265,3 +265,6 @@ ul#strength {
     cursor: pointer;
     outline: none;
 }
+.table-hover > tbody > tr:hover{
+    background-color: white;
+}
