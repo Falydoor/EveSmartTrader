@@ -26,6 +26,8 @@ public class TradeDTO {
 
     private Long typeId;
 
+    private Boolean inMarket;
+
     public Long getTypeId() {
         return typeId;
     }
@@ -112,5 +114,13 @@ public class TradeDTO {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public Boolean getInMarket() {
+        return inMarket;
+    }
+
+    public void setInMarket(Boolean inMarket) {
+        this.inMarket = inMarket;
     }
 }

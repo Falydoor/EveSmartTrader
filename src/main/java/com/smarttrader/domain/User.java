@@ -38,7 +38,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     @JsonIgnore
     @NotNull
-    @Size(min = 60, max = 60) 
+    @Size(min = 60, max = 60)
     @Column(name = "password_hash",length = 60)
     private String password;
 
@@ -75,6 +75,12 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     @Column(name = "reset_date", nullable = true)
     private ZonedDateTime resetDate = null;
+
+    @Column(name = "v_code")
+    private String vCode = null;
+
+    @Column(name = "key_id")
+    private Integer keyId = null;
 
     @JsonIgnore
     @ManyToMany
@@ -178,6 +184,22 @@ public class User extends AbstractAuditingEntity implements Serializable {
         this.langKey = langKey;
     }
 
+    public String getVCode() {
+        return vCode;
+    }
+
+    public void setVCode(String vCode) {
+        this.vCode = vCode;
+    }
+
+    public Integer getKeyId() {
+        return keyId;
+    }
+
+    public void setKeyId(Integer keyId) {
+        this.keyId = keyId;
+    }
+
     public Set<Authority> getAuthorities() {
         return authorities;
     }
@@ -227,6 +249,8 @@ public class User extends AbstractAuditingEntity implements Serializable {
             ", activated='" + activated + '\'' +
             ", langKey='" + langKey + '\'' +
             ", activationKey='" + activationKey + '\'' +
+            ", keyId=" + keyId +
+            ", vCode='" + vCode + '\'' +
             "}";
     }
 }

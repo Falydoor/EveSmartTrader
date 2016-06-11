@@ -40,6 +40,11 @@ public class UserDTO {
     @Size(min = 2, max = 5)
     private String langKey;
 
+    private Integer keyId;
+
+    @Size(min = 64, max = 64)
+    private String vCode;
+
     private Set<String> authorities;
 
     public UserDTO() {
@@ -47,13 +52,13 @@ public class UserDTO {
 
     public UserDTO(User user) {
         this(user.getLogin(), null, user.getFirstName(), user.getLastName(),
-            user.getEmail(), user.getActivated(), user.getLangKey(),
+            user.getEmail(), user.getActivated(), user.getLangKey(), user.getKeyId(), user.getVCode(),
             user.getAuthorities().stream().map(Authority::getName)
                 .collect(Collectors.toSet()));
     }
 
     public UserDTO(String login, String password, String firstName, String lastName,
-        String email, boolean activated, String langKey, Set<String> authorities) {
+        String email, boolean activated, String langKey, Integer keyId, String vCode, Set<String> authorities) {
 
         this.login = login;
         this.password = password;
@@ -63,6 +68,8 @@ public class UserDTO {
         this.activated = activated;
         this.langKey = langKey;
         this.authorities = authorities;
+        this.keyId = keyId;
+        this.vCode = vCode;
     }
 
     public String getPassword() {
@@ -97,6 +104,22 @@ public class UserDTO {
         return authorities;
     }
 
+    public Integer getKeyId() {
+        return keyId;
+    }
+
+    public void setKeyId(Integer keyId) {
+        this.keyId = keyId;
+    }
+
+    public String getvCode() {
+        return vCode;
+    }
+
+    public void setvCode(String vCode) {
+        this.vCode = vCode;
+    }
+
     @Override
     public String toString() {
         return "UserDTO{" +
@@ -107,6 +130,8 @@ public class UserDTO {
             ", email='" + email + '\'' +
             ", activated=" + activated +
             ", langKey='" + langKey + '\'' +
+            ", keyId=" + keyId +
+            ", vCode='" + vCode + '\'' +
             ", authorities=" + authorities +
             "}";
     }

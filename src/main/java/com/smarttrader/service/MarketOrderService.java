@@ -1,8 +1,13 @@
 package com.smarttrader.service;
 
+import com.beimin.eveapi.exception.ApiException;
+import com.beimin.eveapi.parser.ApiAuthorization;
+import com.beimin.eveapi.parser.pilot.MarketOrdersParser;
+import com.beimin.eveapi.response.shared.MarketOrdersResponse;
 import com.smarttrader.domain.MarketOrder;
 import com.smarttrader.domain.Referential;
 import com.smarttrader.domain.SellableInvType;
+import com.smarttrader.domain.User;
 import com.smarttrader.domain.enums.Region;
 import com.smarttrader.domain.enums.Station;
 import com.smarttrader.repository.InvTypeRepository;
@@ -10,6 +15,7 @@ import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
 import com.smarttrader.service.dto.TradeDTO;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -46,6 +52,9 @@ public class MarketOrderService {
     private InvTypeRepository invTypeRepository;
 
     @Scheduled(cron = "0 0/30 * * * ?")
+    @Inject
+    private UserService userService;
+
     public void retrieveMarketOrders() {
         // Delete old market orders
         marketOrderRepository.deleteAllInBatch();
@@ -99,6 +108,7 @@ public class MarketOrderService {
         Station sellStation = Station.AmarrHUB;
         Station buyStation = Station.JitaHUB;
 
+        Set<Long> invTypeInUserMarket = getInvTypeInUserMarket(buyStation.getId(), 0);
         List<TradeDTO> trades = new ArrayList<>();
 
         sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).forEach(sellableInvType -> {
@@ -121,6 +131,7 @@ public class MarketOrderService {
                 trade.setGroupName(Referential.groupParentNameByTypeId.get(sellableInvType.getInvType().getId()));
                 trade.setStation(sellStation.toString());
                 trade.setTypeId(sellableInvType.getInvType().getId());
+                trade.setInMarket(invTypeInUserMarket.contains(trade.getTypeId()));
                 trades.add(trade);
             }
         });
@@ -153,6 +164,7 @@ public class MarketOrderService {
     public JSONArray buildStationTrades() {
         Station stationTrade = Station.JitaHUB;
 
+        Set<Long> invTypeInUserMarket = getInvTypeInUserMarket(stationTrade.getId(), 1);
         List<TradeDTO> trades = new ArrayList<>();
 
         sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).forEach(sellableInvType -> {
@@ -168,6 +180,7 @@ public class MarketOrderService {
                     trade.setName(sellableInvType.getInvType().getTypeName());
                     trade.setGroupName(Referential.groupParentNameByTypeId.get(sellableInvType.getInvType().getId()));
                     trade.setTypeId(sellableInvType.getInvType().getId());
+                    trade.setInMarket(invTypeInUserMarket.contains(trade.getTypeId()));
                     trades.add(trade);
                 }
             }
@@ -176,5 +189,25 @@ public class MarketOrderService {
         trades.sort((t1, t2) -> t2.getProfit().compareTo(t1.getProfit()));
 
         return new JSONArray(trades);
+    }
+
+    private Set<Long> getInvTypeInUserMarket(long stationID, int bid) {
+        User user = userService.getUserWithAuthorities();
+        if (user.getKeyId() == null || StringUtils.isBlank(user.getVCode())) {
+            return new HashSet<>();
+        }
+        try {
+            MarketOrdersParser parser = new MarketOrdersParser();
+            ApiAuthorization auth = new ApiAuthorization(user.getKeyId(), user.getVCode());
+            MarketOrdersResponse response = parser.getResponse(auth);
+            return response.getAll().stream()
+                .filter(marketOrder -> stationID == marketOrder.getStationID() && marketOrder.getBid() == bid && marketOrder.getOrderState() == 0)
+                .mapToLong(com.beimin.eveapi.model.shared.MarketOrder::getTypeID)
+                .boxed()
+                .collect(Collectors.toSet());
+        } catch (ApiException e) {
+            log.error("Unable to retrieve user's market orders", e);
+        }
+        return new HashSet<>();
     }
 }

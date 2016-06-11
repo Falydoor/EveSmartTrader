@@ -78,6 +78,22 @@
                         </p>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="control-label" for="keyId">keyId</label>
+                    <input type="number" class="form-control" id="keyId" name="keyId" placeholder="Your eve keyId"
+                           ng-model="vm.settingsAccount.keyId">
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="vCode">vCode</label>
+                    <input type="text" class="form-control" id="vCode" name="vCode" placeholder="Your eve vCode (has to be exactly 64 characters)"
+                           ng-model="vm.settingsAccount.vCode" ng-minlength=64 ng-maxlength=64 maxlength="64">
+                    <div ng-show="form.vCode.$dirty && form.vCode.$invalid">
+                        <p class="help-block"
+                           ng-show="form.vCode.$error.incorrectlength">
+                            Your vCode has to be exactly 64 characters.
+                        </p>
+                    </div>
+                </div>
 
                 <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
             </form>
