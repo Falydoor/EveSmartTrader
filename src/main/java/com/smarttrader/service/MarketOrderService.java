@@ -128,7 +128,7 @@ public class MarketOrderService {
                 trade.setPercentProfit(100 * trade.getTotalProfit() / trade.getTotalPrice());
                 trade.setProfit(Double.valueOf(cheapestBuyPrice - cheapestSellPrice).longValue());
                 trade.setName(invType.getTypeName());
-                trade.setGroupName(Referential.GroupParentNameByTypeId.get(invType.getId()));
+                trade.setGroupName(Referential.groupParentNameByTypeId.get(invType.getId()));
                 trade.setStation(sellStation.toString());
                 trade.setTypeId(invType.getId());
                 trades.add(trade);
@@ -153,7 +153,7 @@ public class MarketOrderService {
                 TradeDTO trade = new TradeDTO();
                 trade.setTypeId(sellableInvType.getId());
                 trade.setName(invType.getTypeName());
-                trade.setGroupName(Referential.GroupParentNameByTypeId.get(invType.getId()));
+                trade.setGroupName(Referential.groupParentNameByTypeId.get(invType.getId()));
                 trade.setStation(penuryStation.toString());
                 trade.setTotalVolume(invType.getVolume().longValue());
                 trades.add(trade);
@@ -193,7 +193,7 @@ public class MarketOrderService {
                 trade.setPercentProfit(100 * trade.getProfit() / trade.getSellPrice());
                 if (trade.getPercentProfit() >= 10) {
                     trade.setName(invType.getTypeName());
-                    trade.setGroupName(Referential.GroupParentNameByTypeId.get(invType.getId()));
+                    trade.setGroupName(Referential.groupParentNameByTypeId.get(invType.getId()));
                     trade.setTypeId(invType.getId());
                     trades.add(trade);
                 }
@@ -206,6 +206,6 @@ public class MarketOrderService {
     }
 
     private boolean excludeMarketGroups(MarketOrder marketOrder) {
-        return !Referential.GroupParentNameByTypeId.get(marketOrder.getInvType().getId()).equals("Skills");
+        return !Referential.groupParentNameByTypeId.get(marketOrder.getInvType().getId()).equals("Skills");
     }
 }

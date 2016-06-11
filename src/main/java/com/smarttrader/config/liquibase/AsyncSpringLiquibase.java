@@ -78,7 +78,7 @@ public class AsyncSpringLiquibase extends SpringLiquibase {
         watch.stop();
         log.debug("Started Liquibase in {} ms", watch.getTotalTimeMillis());
 
-        Referential.GroupParentNameByTypeId = invTypeRepository.findByInvMarketGroupNotNull().stream().collect(Collectors.toMap(InvType::getId, invType -> {
+        Referential.groupParentNameByTypeId = invTypeRepository.findByInvMarketGroupNotNull().stream().collect(Collectors.toMap(InvType::getId, invType -> {
             String mainParentName = invType.getInvMarketGroup().getMarketGroupName();
             Long parentGroupID = invType.getInvMarketGroup().getParentGroupID();
             while (parentGroupID != null) {
