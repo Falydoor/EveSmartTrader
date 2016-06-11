@@ -124,10 +124,10 @@ public class MarketOrderService {
             if (cheapestSell.isPresent() && cheapestBuy.isPresent() && cheapestSell.get().getPrice() < cheapestBuy.get().getPrice()) {
                 Double cheapestSellPrice = cheapestSell.get().getPrice();
                 Double cheapestBuyPrice = cheapestBuy.get().getPrice();
-                List<MarketOrder> sellables = marketOrderRepository.findByInvTypeIdAndStationIDAndBuyFalseAndPriceLessThanEqualOrderByPrice(sellableInvType.getInvType().getId(), sellStation.getId(), cheapestSellPrice * 1.1);
+                List<MarketOrder> sellables = marketOrderRepository.findByInvTypeIdAndStationIDAndBuyFalseAndPriceLessThanEqualAndPriceLessThanOrderByPrice(sellableInvType.getInvType().getId(), sellStation.getId(), cheapestSellPrice * 1.1D, cheapestBuyPrice);
                 TradeDTO trade = new TradeDTO();
-                trade.setTotalPrice(Double.valueOf(sellables.stream().mapToDouble(MarketOrder::getPrice).sum()).longValue());
-                trade.setTotalProfit(Double.valueOf(sellables.stream().mapToDouble(value -> cheapestBuyPrice - value.getPrice()).sum()).longValue());
+                trade.setTotalPrice(Double.valueOf(sellables.stream().mapToDouble(value -> value.getPrice() * value.getVolume()).sum()).longValue());
+                trade.setTotalProfit(Double.valueOf(sellables.stream().mapToDouble(value -> (cheapestBuyPrice - value.getPrice()) * value.getVolume()).sum()).longValue());
                 trade.setTotalQuantity(sellables.stream().mapToLong(MarketOrder::getVolume).sum());
                 trade.setTotalVolume(Double.valueOf(trade.getTotalQuantity() * sellableInvType.getInvType().getVolume()).longValue());
                 trade.setSellPrice(cheapestBuyPrice.longValue());
