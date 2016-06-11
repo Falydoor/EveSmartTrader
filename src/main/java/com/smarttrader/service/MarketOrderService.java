@@ -16,6 +16,7 @@ import com.smarttrader.repository.SellableInvTypeRepository;
 import com.smarttrader.service.dto.TradeDTO;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -51,11 +52,14 @@ public class MarketOrderService {
     @Inject
     private InvTypeRepository invTypeRepository;
 
-    @Scheduled(cron = "0 0/30 * * * ?")
     @Inject
     private UserService userService;
 
+    @Scheduled(cron = "0 0/30 * * * ?")
     public void retrieveMarketOrders() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
         // Delete old market orders
         marketOrderRepository.deleteAllInBatch();
         marketOrderRepository.flush();
@@ -66,6 +70,8 @@ public class MarketOrderService {
         Arrays.stream(Region.values()).parallel()
             .forEach(region -> retrieveMarketOrders(region, sellableByTypeId, "https://crest-tq.eveonline.com/market/" + region.getId() + "/orders/all/", 1));
         marketOrderRepository.flush();
+        stopWatch.stop();
+        log.info("Retrieved market orders in {}ms", stopWatch.getTime());
     }
 
     private void retrieveMarketOrders(Region region, Map<Long, SellableInvType> sellableByTypeId, String url, int page) {

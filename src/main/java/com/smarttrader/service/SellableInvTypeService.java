@@ -9,6 +9,7 @@ import com.smarttrader.repository.InvMarketGroupRepository;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -48,6 +49,9 @@ public class SellableInvTypeService {
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void retrieveSellableInvType() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
         // Delete old sellable inv types
         sellableInvTypeRepository.deleteAllInBatch();
         sellableInvTypeRepository.flush();
@@ -102,5 +106,7 @@ public class SellableInvTypeService {
         log.info("Saving sellable inv type");
         sellableInvTypeRepository.save(sellableInvTypes);
         sellableInvTypeRepository.flush();
+        stopWatch.stop();
+        log.info("Retrieved sellable inv type in {}ms", stopWatch.getTime());
     }
 }
