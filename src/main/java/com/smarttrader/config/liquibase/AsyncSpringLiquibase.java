@@ -76,7 +76,6 @@ public class AsyncSpringLiquibase extends SpringLiquibase {
         watch.start();
         super.afterPropertiesSet();
         watch.stop();
-        log.debug("Started Liquibase in {} ms", watch.getTotalTimeMillis());
 
         Referential.groupParentNameByTypeId = invTypeRepository.findByInvMarketGroupNotNull().stream().collect(Collectors.toMap(InvType::getId, invType -> {
             String mainParentName = invType.getInvMarketGroup().getMarketGroupName();
@@ -88,5 +87,6 @@ public class AsyncSpringLiquibase extends SpringLiquibase {
             }
             return mainParentName;
         }));
+        log.debug("Started Liquibase in {} ms", watch.getTotalTimeMillis());
     }
 }
