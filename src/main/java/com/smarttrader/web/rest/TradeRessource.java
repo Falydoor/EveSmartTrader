@@ -1,6 +1,7 @@
 package com.smarttrader.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.smarttrader.domain.enums.Station;
 import com.smarttrader.service.MarketOrderService;
 import org.json.JSONArray;
 import org.slf4j.Logger;
@@ -33,9 +34,9 @@ public class TradeRessource {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Transactional(readOnly = true)
-    public ResponseEntity<JSONArray> getHubTrades()
+    public ResponseEntity<JSONArray> getHubTrades(Station station)
         throws URISyntaxException {
-        return new ResponseEntity<>(marketOrderService.buildHubTrades(), HttpStatus.OK);
+        return new ResponseEntity<>(marketOrderService.buildHubTrades(station), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/penuryTrades",
@@ -43,9 +44,9 @@ public class TradeRessource {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Transactional(readOnly = true)
-    public ResponseEntity<JSONArray> getPenuryTrades()
+    public ResponseEntity<JSONArray> getPenuryTrades(Station station)
         throws URISyntaxException {
-        return new ResponseEntity<>(marketOrderService.buildPenuryTrades(), HttpStatus.OK);
+        return new ResponseEntity<>(marketOrderService.buildPenuryTrades(station), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/stationTrades",
@@ -53,9 +54,9 @@ public class TradeRessource {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Transactional(readOnly = true)
-    public ResponseEntity<JSONArray> getStationTrades()
+    public ResponseEntity<JSONArray> getStationTrades(Station station)
         throws URISyntaxException {
-        return new ResponseEntity<>(marketOrderService.buildStationTrades(), HttpStatus.OK);
+        return new ResponseEntity<>(marketOrderService.buildStationTrades(station), HttpStatus.OK);
     }
 
 }

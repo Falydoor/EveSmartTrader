@@ -1,7 +1,13 @@
 <div>
-    <button ng-click="vm.refresh()" type="button" class="btn btn-default btn-lg">
+    <button ng-click="vm.loadTrades()" type="button" class="btn btn-default btn-lg">
         <span class="glyphicon glyphicon-refresh"></span>
     </button>
+    <h4>
+        Station
+        <select ng-options="station for station in vm.stations track by station" ng-model="vm.station"
+                ng-change="vm.loadTrades()">
+        </select>
+    </h4>
     <h2 ng-click="vm.showPenuryTrades = !vm.showPenuryTrades" class="pointer">{{vm.penuryTradesSize !== undefined ?
         vm.penuryTradesSize + ' ' :
         'Loading '}}Penury
@@ -86,6 +92,8 @@
         Trades
         {{vm.showHubTrades ? '' : '(hided)'}}
     </h2>
+    Seller Station
+    <select ng-options="station for station in vm.stations track by station" ng-model="vm.sellerStation"></select>
     <table ng-show="vm.showHubTrades" class="table table-hover">
         <thead>
         <tr>
@@ -101,7 +109,8 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="trade in vm.hubTrades" class="{{trade.inMarket ? 'danger' : ''}}">
+        <tr ng-show="trade.station === vm.sellerStation" ng-repeat="trade in vm.hubTrades"
+            class="{{trade.inMarket ? 'danger' : ''}}">
             <td><span class="label label-info">{{trade.totalProfit | number}} ISK</span></td>
             <td><span class="label label-primary">{{trade.profit | number}} ISK</span></td>
             <td><span class="label label-success">{{trade.percentProfit}} %</span></td>

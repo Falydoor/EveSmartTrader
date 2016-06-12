@@ -3,6 +3,7 @@ package com.smarttrader.web.rest.dto;
 import com.smarttrader.domain.Authority;
 import com.smarttrader.domain.User;
 
+import com.smarttrader.domain.enums.Station;
 import org.hibernate.validator.constraints.Email;
 
 import javax.validation.constraints.*;
@@ -47,6 +48,8 @@ public class UserDTO {
 
     private Set<String> authorities;
 
+    private Station[] stations;
+
     public UserDTO() {
     }
 
@@ -70,6 +73,7 @@ public class UserDTO {
         this.authorities = authorities;
         this.keyId = keyId;
         this.vCode = vCode;
+        this.stations = Station.values();
     }
 
     public String getPassword() {
@@ -118,6 +122,14 @@ public class UserDTO {
 
     public void setvCode(String vCode) {
         this.vCode = vCode;
+    }
+
+    public Station[] getStations() {
+        return stations;
+    }
+
+    public void setStations(Station[] stations) {
+        this.stations = stations;
     }
 
     @Override
