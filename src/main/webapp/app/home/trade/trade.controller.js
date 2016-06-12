@@ -19,7 +19,8 @@
         vm.showPenuryTrades = false;
         vm.showStationTrades = false;
 
-        vm.copy = function (name) {
+        vm.copy = function (name, $event) {
+            $($event.currentTarget).closest('tr').removeClass('danger').addClass('success');
             clipboard.copyText(name);
         };
         vm.loadTrades = function () {
