@@ -87,6 +87,7 @@ public class InvMarketGroupResourceIntTest {
     public void initTest() {
         invMarketGroupSearchRepository.deleteAll();
         invMarketGroup = new InvMarketGroup();
+        invMarketGroup.setId(1L);
         invMarketGroup.setParentGroupID(DEFAULT_PARENT_GROUP_ID);
         invMarketGroup.setMarketGroupName(DEFAULT_MARKET_GROUP_NAME);
         invMarketGroup.setDescription(DEFAULT_DESCRIPTION);

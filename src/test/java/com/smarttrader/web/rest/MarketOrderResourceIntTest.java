@@ -107,6 +107,7 @@ public class MarketOrderResourceIntTest {
     public void initTest() {
         marketOrderSearchRepository.deleteAll();
         marketOrder = new MarketOrder();
+        marketOrder.setId(1L);
         marketOrder.setBuy(DEFAULT_BUY);
         marketOrder.setIssued(DEFAULT_ISSUED);
         marketOrder.setPrice(DEFAULT_PRICE);

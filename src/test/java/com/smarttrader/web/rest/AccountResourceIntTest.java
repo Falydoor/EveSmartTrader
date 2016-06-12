@@ -4,6 +4,8 @@ import com.smarttrader.EveSmartTraderApp;
 import com.smarttrader.domain.Authority;
 import com.smarttrader.domain.User;
 import com.smarttrader.repository.AuthorityRepository;
+import com.smarttrader.repository.InvMarketGroupRepository;
+import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.UserRepository;
 import com.smarttrader.security.AuthoritiesConstants;
 import com.smarttrader.service.MailService;
@@ -56,6 +58,12 @@ public class AccountResourceIntTest {
     @Inject
     private UserService userService;
 
+    @Inject
+    private InvTypeRepository invTypeRepository;
+
+    @Inject
+    private InvMarketGroupRepository invMarketGroupRepository;
+
     @Mock
     private UserService mockUserService;
 
@@ -75,11 +83,15 @@ public class AccountResourceIntTest {
         ReflectionTestUtils.setField(accountResource, "userRepository", userRepository);
         ReflectionTestUtils.setField(accountResource, "userService", userService);
         ReflectionTestUtils.setField(accountResource, "mailService", mockMailService);
+        ReflectionTestUtils.setField(accountResource, "invTypeRepository", invTypeRepository);
+        ReflectionTestUtils.setField(accountResource, "invMarketGroupRepository", invMarketGroupRepository);
 
         AccountResource accountUserMockResource = new AccountResource();
         ReflectionTestUtils.setField(accountUserMockResource, "userRepository", userRepository);
         ReflectionTestUtils.setField(accountUserMockResource, "userService", mockUserService);
         ReflectionTestUtils.setField(accountUserMockResource, "mailService", mockMailService);
+        ReflectionTestUtils.setField(accountUserMockResource, "invTypeRepository", invTypeRepository);
+        ReflectionTestUtils.setField(accountUserMockResource, "invMarketGroupRepository", invMarketGroupRepository);
 
         this.restMvc = MockMvcBuilders.standaloneSetup(accountResource).build();
         this.restUserMockMvc = MockMvcBuilders.standaloneSetup(accountUserMockResource).build();

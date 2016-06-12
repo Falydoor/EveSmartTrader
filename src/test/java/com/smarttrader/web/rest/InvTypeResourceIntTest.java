@@ -111,6 +111,7 @@ public class InvTypeResourceIntTest {
     public void initTest() {
         invTypeSearchRepository.deleteAll();
         invType = new InvType();
+        invType.setId(1L);
         invType.setGroupID(DEFAULT_GROUP_ID);
         invType.setTypeName(DEFAULT_TYPE_NAME);
         invType.setDescription(DEFAULT_DESCRIPTION);
