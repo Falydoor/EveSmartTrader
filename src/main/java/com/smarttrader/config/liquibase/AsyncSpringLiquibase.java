@@ -44,12 +44,6 @@ public class AsyncSpringLiquibase extends SpringLiquibase {
     @Inject
     private Environment env;
 
-    @Inject
-    private InvTypeRepository invTypeRepository;
-
-    @Inject
-    private InvMarketGroupRepository invMarketGroupRepository;
-
     @Override
     public void afterPropertiesSet() throws LiquibaseException {
         if (!env.acceptsProfiles(Constants.SPRING_PROFILE_NO_LIQUIBASE)) {
@@ -76,17 +70,6 @@ public class AsyncSpringLiquibase extends SpringLiquibase {
         watch.start();
         super.afterPropertiesSet();
         watch.stop();
-
-        Referential.groupParentNameByTypeId = invTypeRepository.findByInvMarketGroupNotNull().stream().collect(Collectors.toMap(InvType::getId, invType -> {
-            String mainParentName = invType.getInvMarketGroup().getMarketGroupName();
-            Long parentGroupID = invType.getInvMarketGroup().getParentGroupID();
-            while (parentGroupID != null) {
-                InvMarketGroup invMarketGroup = invMarketGroupRepository.findOne(parentGroupID);
-                mainParentName = invMarketGroup.getMarketGroupName();
-                parentGroupID = invMarketGroup.getParentGroupID();
-            }
-            return mainParentName;
-        }));
         log.debug("Started Liquibase in {} ms", watch.getTotalTimeMillis());
     }
 }
