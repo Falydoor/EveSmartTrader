@@ -69,7 +69,7 @@ public class MarketOrderService {
 
         Set<MarketOrder> marketOrders = new HashSet<>();
         Arrays.stream(Region.values()).parallel()
-            .forEach(region -> retrieveMarketOrders(marketOrders, region, sellableByTypeId, Referential.CREST_URL + region.getId() + "/orders/all/", 1));
+            .forEach(region -> retrieveMarketOrders(marketOrders, region, sellableByTypeId, Referential.CREST_URL + "market/" + region.getId() + "/orders/all/", 1));
         marketOrderRepository.save(marketOrders);
         marketOrderRepository.flush();
         stopWatch.stop();
