@@ -116,14 +116,14 @@ public class MarketOrderService {
         List<TradeDTO> trades = new ArrayList<>();
 
         sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).forEach(sellableInvType -> {
-            Optional<MarketOrder> cheapestBuy = marketOrderRepository.findFirstByInvTypeIdAndStationIDAndBuyFalseOrderByPrice(sellableInvType.getInvType().getId(), station.getId());
+            Optional<MarketOrder> cheapestBuy = marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(sellableInvType.getInvType(), station.getId());
 
             sellStations.forEach(sellStation -> {
-                Optional<MarketOrder> cheapestSell = marketOrderRepository.findFirstByInvTypeIdAndStationIDAndBuyFalseOrderByPrice(sellableInvType.getInvType().getId(), sellStation.getId());
+                Optional<MarketOrder> cheapestSell = marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(sellableInvType.getInvType(), sellStation.getId());
                 if (cheapestSell.isPresent() && cheapestBuy.isPresent() && cheapestSell.get().getPrice() < cheapestBuy.get().getPrice()) {
                     Double cheapestSellPrice = cheapestSell.get().getPrice();
                     Double cheapestBuyPrice = cheapestBuy.get().getPrice();
-                    List<MarketOrder> sellables = marketOrderRepository.findByInvTypeIdAndStationIDAndBuyFalseAndPriceLessThanEqualAndPriceLessThanOrderByPrice(sellableInvType.getInvType().getId(), sellStation.getId(), cheapestSellPrice * 1.1D, cheapestBuyPrice);
+                    List<MarketOrder> sellables = marketOrderRepository.findByInvTypeAndStationIDAndBuyFalseAndPriceLessThanOrderByPrice(sellableInvType.getInvType(), sellStation.getId(), Math.min(cheapestSellPrice * 1.1D, cheapestBuyPrice));
                     TradeDTO trade = new TradeDTO();
                     trade.setTotalPrice(Double.valueOf(sellables.stream().mapToDouble(value -> value.getPrice() * value.getVolume()).sum()).longValue());
                     trade.setTotalProfit(Double.valueOf(sellables.stream().mapToDouble(value -> (cheapestBuyPrice - value.getPrice()) * value.getVolume()).sum()).longValue());
@@ -152,7 +152,7 @@ public class MarketOrderService {
         List<TradeDTO> trades = new ArrayList<>();
 
         sellableInvTypeRepository.findAll().stream()
-            .filter(sellableInvType -> marketOrderRepository.countByInvTypeIdAndStationIDAndBuyFalse(sellableInvType.getInvType().getId(), station.getId()) == 0)
+            .filter(sellableInvType -> marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(sellableInvType.getInvType(), station.getId()) == 0)
             .forEach(sellableInvType -> {
                 TradeDTO trade = new TradeDTO();
                 trade.setTypeId(sellableInvType.getInvType().getId());
@@ -171,8 +171,8 @@ public class MarketOrderService {
         List<TradeDTO> trades = new ArrayList<>();
 
         sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).forEach(sellableInvType -> {
-            Optional<MarketOrder> cheapestSell = marketOrderRepository.findFirstByInvTypeIdAndStationIDAndBuyFalseOrderByPrice(sellableInvType.getInvType().getId(), station.getId());
-            Optional<MarketOrder> costliestBuy = marketOrderRepository.findFirstByInvTypeIdAndStationIDAndBuyTrueOrderByPriceDesc(sellableInvType.getInvType().getId(), station.getId());
+            Optional<MarketOrder> cheapestSell = marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(sellableInvType.getInvType(), station.getId());
+            Optional<MarketOrder> costliestBuy = marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(sellableInvType.getInvType(), station.getId());
 
             if (cheapestSell.isPresent() && costliestBuy.isPresent()) {
                 TradeDTO trade = new TradeDTO();

@@ -1,5 +1,6 @@
 package com.smarttrader.repository;
 
+import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.MarketOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,11 +12,11 @@ import java.util.Optional;
  */
 public interface MarketOrderRepository extends JpaRepository<MarketOrder, Long> {
 
-    Optional<MarketOrder> findFirstByInvTypeIdAndStationIDAndBuyFalseOrderByPrice(Long invTypeId, Long stationID);
+    Optional<MarketOrder> findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(InvType invType, Long stationID);
 
-    List<MarketOrder> findByInvTypeIdAndStationIDAndBuyFalseAndPriceLessThanEqualAndPriceLessThanOrderByPrice(Long invTypeId, Long stationID, Double thresholdPrice, Double buyPrice);
+    List<MarketOrder> findByInvTypeAndStationIDAndBuyFalseAndPriceLessThanOrderByPrice(InvType invType, Long stationID, Double thresholdPrice);
 
-    Long countByInvTypeIdAndStationIDAndBuyFalse(Long invTypeId, Long stationID);
+    Long countByInvTypeAndStationIDAndBuyFalse(InvType invType, Long stationID);
 
-    Optional<MarketOrder> findFirstByInvTypeIdAndStationIDAndBuyTrueOrderByPriceDesc(Long invTypeId, Long stationID);
+    Optional<MarketOrder> findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(InvType invType, Long stationID);
 }
