@@ -37,6 +37,7 @@
             Trade.penuryTrades({station: vm.station}, function (trades) {
                 vm.penuryTrades = trades;
                 vm.penuryTradesSize = trades.length;
+                vm.showPenuryTrades = vm.penuryTradesSize > 0;
             });
             Trade.stationTrades({station: vm.station}, function (trades) {
                 vm.stationTrades = trades;
