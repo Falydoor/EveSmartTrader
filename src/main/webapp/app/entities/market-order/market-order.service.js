@@ -19,7 +19,8 @@
                     return data;
                 }
             },
-            'update': { method:'PUT' }
+            'update': { method:'PUT' },
+            'reload': { method: 'GET', url: 'api/market-orders/reload' }
         });
     }
 })();

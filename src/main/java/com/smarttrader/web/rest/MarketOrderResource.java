@@ -173,4 +173,14 @@ public class MarketOrderResource {
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/market-orders/reload",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<Void> reloadMarketOrders() {
+        log.debug("REST request to reload all MarketOrder");
+        marketOrderService.retrieveMarketOrders();
+        return ResponseEntity.ok().headers(HeaderUtil.createAlert("All market orders reloaded", null)).build();
+    }
+
 }

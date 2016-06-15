@@ -19,6 +19,11 @@
         vm.searchQuery = pagingParams.search;
         vm.currentSearch = pagingParams.search;
         vm.loadAll();
+        vm.reloadMarketOrders = function () {
+            MarketOrder.reload({}, function () {
+                vm.loadAll();
+            });
+        };
 
         function loadAll () {
             if (pagingParams.search) {
