@@ -136,18 +136,18 @@ public class AccountResource {
     @Timed
     public ResponseEntity<UserDTO> getAccount() {
         // Init referential
-//        if (Referential.groupParentNameByTypeId.isEmpty()) {
-//            Referential.groupParentNameByTypeId = invTypeRepository.findByInvMarketGroupNotNull().stream().collect(Collectors.toMap(InvType::getId, invType -> {
-//                String mainParentName = invType.getInvMarketGroup().getMarketGroupName();
-//                Long parentGroupID = invType.getInvMarketGroup().getParentGroupID();
-//                while (parentGroupID != null) {
-//                    InvMarketGroup invMarketGroup = invMarketGroupRepository.findOne(parentGroupID);
-//                    mainParentName = invMarketGroup.getMarketGroupName();
-//                    parentGroupID = invMarketGroup.getParentGroupID();
-//                }
-//                return mainParentName;
-//            }));
-//        }
+        if (Referential.GROUP_PARENT_NAME_BY_TYPE_ID.isEmpty()) {
+            Referential.GROUP_PARENT_NAME_BY_TYPE_ID = invTypeRepository.findByInvMarketGroupNotNull().stream().collect(Collectors.toMap(InvType::getId, invType -> {
+                String mainParentName = invType.getInvMarketGroup().getMarketGroupName();
+                Long parentGroupID = invType.getInvMarketGroup().getParentGroupID();
+                while (parentGroupID != null) {
+                    InvMarketGroup invMarketGroup = invMarketGroupRepository.findOne(parentGroupID);
+                    mainParentName = invMarketGroup.getMarketGroupName();
+                    parentGroupID = invMarketGroup.getParentGroupID();
+                }
+                return mainParentName;
+            }));
+        }
 
         return Optional.ofNullable(userService.getUserWithAuthorities())
             .map(user -> new ResponseEntity<>(new UserDTO(user), HttpStatus.OK))

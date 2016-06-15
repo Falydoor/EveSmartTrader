@@ -66,7 +66,7 @@ public class SellableInvTypeService {
                 mainParentGroupID = parentGroupID;
                 parentGroupID = invMarketGroup.getParentGroupID();
             }
-            return Referential.sellables.contains(mainParentGroupID) && invType.getVolume() <= 1000;
+            return Referential.SELLABLE_PARENT_GROUP.contains(mainParentGroupID) && invType.getVolume() <= 1000;
         }).collect(Collectors.toList());
         int[] index = {0};
         double[] percent = {-1};
@@ -75,7 +75,7 @@ public class SellableInvTypeService {
                 int j = 0;
                 SellableInvType sellableInvType = new SellableInvType();
                 sellableInvType.setInvType(invType);
-                String url = "https://crest-tq.eveonline.com/market/" + Region.THE_FORGE.getId() + "/types/" + invType.getId() + "/history/";
+                String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
                 HttpGet request = new HttpGet(url);
                 CloseableHttpResponse response = client.build().execute(request);
                 JSONObject jsonObject = new JSONObject(IOUtils.toString(response.getEntity().getContent()));

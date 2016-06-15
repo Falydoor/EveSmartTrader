@@ -69,7 +69,7 @@ public class MarketOrderService {
 
         Set<MarketOrder> marketOrders = new HashSet<>();
         Arrays.stream(Region.values()).parallel()
-            .forEach(region -> retrieveMarketOrders(marketOrders, region, sellableByTypeId, "https://crest-tq.eveonline.com/market/" + region.getId() + "/orders/all/", 1));
+            .forEach(region -> retrieveMarketOrders(marketOrders, region, sellableByTypeId, Referential.CREST_URL + region.getId() + "/orders/all/", 1));
         marketOrderRepository.save(marketOrders);
         marketOrderRepository.flush();
         stopWatch.stop();
@@ -133,7 +133,7 @@ public class MarketOrderService {
                     trade.setPercentProfit(100 * trade.getTotalProfit() / trade.getTotalPrice());
                     trade.setProfit(Double.valueOf(cheapestBuyPrice - cheapestSellPrice).longValue());
                     trade.setName(sellableInvType.getInvType().getTypeName());
-                    trade.setGroupName(Referential.groupParentNameByTypeId.get(sellableInvType.getInvType().getId()));
+                    trade.setGroupName(Referential.GROUP_PARENT_NAME_BY_TYPE_ID.get(sellableInvType.getInvType().getId()));
                     trade.setStation(sellStation.toString());
                     trade.setTypeId(sellableInvType.getInvType().getId());
                     trade.setInMarket(invTypeInUserMarket.contains(trade.getTypeId()));
@@ -157,7 +157,7 @@ public class MarketOrderService {
                 TradeDTO trade = new TradeDTO();
                 trade.setTypeId(sellableInvType.getInvType().getId());
                 trade.setName(sellableInvType.getInvType().getTypeName());
-                trade.setGroupName(Referential.groupParentNameByTypeId.get(sellableInvType.getInvType().getId()));
+                trade.setGroupName(Referential.GROUP_PARENT_NAME_BY_TYPE_ID.get(sellableInvType.getInvType().getId()));
                 trade.setStation(station.toString());
                 trade.setTotalVolume(sellableInvType.getInvType().getVolume().longValue());
                 trades.add(trade);
@@ -181,7 +181,7 @@ public class MarketOrderService {
                 trade.setPercentProfit(100 * trade.getProfit() / trade.getSellPrice());
                 if (trade.getPercentProfit() >= 10) {
                     trade.setName(sellableInvType.getInvType().getTypeName());
-                    trade.setGroupName(Referential.groupParentNameByTypeId.get(sellableInvType.getInvType().getId()));
+                    trade.setGroupName(Referential.GROUP_PARENT_NAME_BY_TYPE_ID.get(sellableInvType.getInvType().getId()));
                     trade.setTypeId(sellableInvType.getInvType().getId());
                     trade.setInMarket(invTypeInUserMarket.contains(trade.getTypeId()));
                     trades.add(trade);
