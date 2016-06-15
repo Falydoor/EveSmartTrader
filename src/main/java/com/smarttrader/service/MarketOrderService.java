@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -116,14 +117,16 @@ public class MarketOrderService {
         List<TradeDTO> trades = new ArrayList<>();
 
         sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).forEach(sellableInvType -> {
-            Optional<MarketOrder> cheapestBuy = marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(sellableInvType.getInvType(), station.getId());
+            List<MarketOrder> sellOrders = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType());
+            Map<Long, List<MarketOrder>> sellOrdersByStation = sellOrders.stream().collect(Collectors.groupingBy(MarketOrder::getStationID));
+            List<MarketOrder> cheapestBuy = sellOrdersByStation.get(station.getId());
 
             sellStations.forEach(sellStation -> {
-                Optional<MarketOrder> cheapestSell = marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(sellableInvType.getInvType(), sellStation.getId());
-                if (cheapestSell.isPresent() && cheapestBuy.isPresent() && cheapestSell.get().getPrice() < cheapestBuy.get().getPrice()) {
-                    Double cheapestSellPrice = cheapestSell.get().getPrice();
-                    Double cheapestBuyPrice = cheapestBuy.get().getPrice();
-                    List<MarketOrder> sellables = marketOrderRepository.findByInvTypeAndStationIDAndBuyFalseAndPriceLessThanOrderByPrice(sellableInvType.getInvType(), sellStation.getId(), Math.min(cheapestSellPrice * 1.1D, cheapestBuyPrice));
+                List<MarketOrder> cheapestSell = sellOrdersByStation.get(sellStation.getId());
+                if (!CollectionUtils.isEmpty(cheapestBuy) && !CollectionUtils.isEmpty(cheapestSell) && cheapestSell.get(0).getPrice() < cheapestBuy.get(0).getPrice()) {
+                    Double cheapestSellPrice = cheapestSell.get(0).getPrice();
+                    Double cheapestBuyPrice = cheapestBuy.get(0).getPrice();
+                    List<MarketOrder> sellables = cheapestSell.stream().filter(marketOrder -> marketOrder.getPrice() < Math.min(cheapestSellPrice * 1.1D, cheapestBuyPrice)).collect(Collectors.toList());
                     TradeDTO trade = new TradeDTO();
                     trade.setTotalPrice(Double.valueOf(sellables.stream().mapToDouble(value -> value.getPrice() * value.getVolume()).sum()).longValue());
                     trade.setTotalProfit(Double.valueOf(sellables.stream().mapToDouble(value -> (cheapestBuyPrice - value.getPrice()) * value.getVolume()).sum()).longValue());

@@ -12,9 +12,9 @@ import java.util.Optional;
  */
 public interface MarketOrderRepository extends JpaRepository<MarketOrder, Long> {
 
-    Optional<MarketOrder> findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(InvType invType, Long stationID);
+    List<MarketOrder> findByInvTypeAndBuyFalseOrderByPrice(InvType invType);
 
-    List<MarketOrder> findByInvTypeAndStationIDAndBuyFalseAndPriceLessThanOrderByPrice(InvType invType, Long stationID, Double thresholdPrice);
+    Optional<MarketOrder> findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(InvType invType, Long stationID);
 
     Long countByInvTypeAndStationIDAndBuyFalse(InvType invType, Long stationID);
 
