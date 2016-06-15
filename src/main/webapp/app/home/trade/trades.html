@@ -97,23 +97,26 @@
     <table ng-show="vm.showHubTrades" class="table table-hover">
         <thead>
         <tr>
+            <th>PROFIT</th>
             <th>PROFIT (TOTAL)</th>
-            <th>PROFIT (UNIT)</th>
+            <th>BUY PRICE (TOTAL)</th>
             <th>PROFIT (%)</th>
+            <th>SELL PRICE</th>
+            <th>QUANTITY</th>
             <th>TYPE</th>
             <th>NAME</th>
             <th>LINKS</th>
-            <th>PRICE</th>
-            <th>STATION</th>
-            <th>QUANTITY</th>
         </tr>
         </thead>
         <tbody>
         <tr ng-show="trade.station === vm.sellerStation" ng-repeat="trade in vm.hubTrades"
             class="{{trade.inMarket ? 'danger' : ''}}">
-            <td><span class="label label-info">{{trade.totalProfit | number}} ISK</span></td>
-            <td><span class="label label-primary">{{trade.profit | number}} ISK</span></td>
-            <td><span class="label label-success">{{trade.percentProfit}} %</span></td>
+            <td><span class="label label-info">{{trade.profit | number}} ISK</span></td>
+            <td><span class="label label-primary">{{trade.totalProfit | number}} ISK</span></td>
+            <td><span class="label label-success">{{trade.totalPrice | number}} ISK</span></td>
+            <td><span class="label label-info">{{trade.percentProfit}} %</span></td>
+            <td><span class="label label-primary">{{trade.sellPrice | number}} ISK</span></td>
+            <td><span class="label label-success">{{trade.totalQuantity}} ({{trade.totalVolume}}m3)</span></td>
             <td><span class="label label-warning">{{trade.groupName}}</span></td>
             <td>
                 <span>
@@ -129,9 +132,6 @@
                 href="http://eve-marketdata.com/price_check.php?step=Show&type_id={{trade.typeId}}&region_id={{hub.station.region.id}}&type=history"
                 target="_blank">MD</a>
             </td>
-            <td><span class="label label-info">{{trade.sellPrice | number}} ISK</span></td>
-            <td><span class="label label-primary">{{trade.station}}</span></td>
-            <td><span class="label label-success">{{trade.totalQuantity}} ({{trade.totalVolume}}m3)</span></td>
         </tr>
         </tbody>
     </table>
