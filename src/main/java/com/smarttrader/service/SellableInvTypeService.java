@@ -12,6 +12,8 @@ import com.smarttrader.repository.SellableInvTypeRepository;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -51,10 +53,19 @@ public class SellableInvTypeService {
     @Inject
     private MarketOrderRepository marketOrderRepository;
 
+    private CloseableHttpClient client = HttpClientBuilder.create().build();
+
+    private int index;
+
+    private double percent;
+
     @Scheduled(cron = "0 0 0 * * ?")
     public void retrieveSellableInvType() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
+
+        index = 0;
+        percent = -1;
 
         // Delete market orders
         marketOrderRepository.deleteAllInBatch();
@@ -65,7 +76,6 @@ public class SellableInvTypeService {
         sellableInvTypeRepository.flush();
 
         Set<SellableInvType> sellableInvTypes = new HashSet<>();
-        HttpClientBuilder client = HttpClientBuilder.create();
         List<InvType> invTypes = invTypeRepository.findByInvMarketGroupNotNull().parallelStream().filter(invType -> {
             long mainParentGroupID = invType.getInvMarketGroup().getId();
             Long parentGroupID = invType.getInvMarketGroup().getParentGroupID();
@@ -76,39 +86,9 @@ public class SellableInvTypeService {
             }
             return Referential.SELLABLE_PARENT_GROUP.contains(mainParentGroupID) && invType.getVolume() <= 1000;
         }).collect(Collectors.toList());
-        int[] index = {0};
-        double[] percent = {-1};
         invTypes.parallelStream().forEach(invType -> {
-            try {
-                int j = 0;
-                SellableInvType sellableInvType = new SellableInvType();
-                sellableInvType.setInvType(invType);
-                String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
-                HttpGet request = new HttpGet(url);
-                CloseableHttpResponse response = client.build().execute(request);
-                JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
-                JSONArray items = jsonObject.getJSONArray("items");
-                for (int i = items.length() - 1; i > Math.max(0, items.length() - 31); --i) {
-                    JSONObject item = items.optJSONObject(i);
-                    if ((item.getInt("volume") >= 50 && item.getDouble("highPrice") >= 2000000) || (item.getInt("volume") >= 500 && item.getDouble("highPrice") >= 1000000)) {
-                        ++j;
-                    }
-                    if (j > 14) {
-                        sellableInvTypes.add(sellableInvType);
-                        break;
-                    }
-                }
-                ++index[0];
-                double tempPercent = Math.floor(100 * index[0] / invTypes.size());
-                if (tempPercent != percent[0]) {
-                    percent[0] = tempPercent;
-                    log.info("Sellable progress : {}%", percent[0]);
-                }
-            } catch (IOException e) {
-                log.error("Error getting sellable inv types from URL", e);
-            } catch (JSONException e) {
-                log.error("Error parsing sellable inv types", e);
-            }
+            String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
+            getHistory(sellableInvTypes, invTypes.size(), invType, url, 1);
         });
 
         log.info("Saving sellable inv type");
@@ -116,5 +96,53 @@ public class SellableInvTypeService {
         sellableInvTypeRepository.flush();
         stopWatch.stop();
         log.info("Retrieved sellable inv type in {}ms", stopWatch.getTime());
+    }
+
+    private void getHistory(Set<SellableInvType> sellableInvTypes, int invTypesSize, InvType invType, String url, int tries) {
+        try {
+            int j = 0;
+            SellableInvType sellableInvType = new SellableInvType();
+            sellableInvType.setInvType(invType);
+            HttpGet request = new HttpGet(url);
+            CloseableHttpResponse response = client.execute(request);
+            JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
+            JSONArray items = jsonObject.getJSONArray("items");
+            for (int i = items.length() - 1; i > Math.max(0, items.length() - 31); --i) {
+                JSONObject item = items.optJSONObject(i);
+                if (isHistorySellable(item)) {
+                    ++j;
+                }
+                if (j > 14) {
+                    sellableInvTypes.add(sellableInvType);
+                    break;
+                }
+            }
+            ++index;
+            double tempPercent = Math.floor(100 * index / invTypesSize);
+            if (tempPercent != percent) {
+                percent = tempPercent;
+                log.info("Sellable progress : {}%", percent);
+            }
+        } catch (ConnectTimeoutException e) {
+            log.info("Timeout on {} try {}", url, tries);
+            if (tries < 6) {
+                getHistory(sellableInvTypes, invTypesSize, invType, url, ++tries);
+            }
+        } catch (IOException e) {
+            log.error("Error getting sellable inv types from URL", e);
+        } catch (JSONException e) {
+            log.error("Error parsing sellable inv types", e);
+        }
+    }
+
+    private boolean isHistorySellable(JSONObject item) throws JSONException {
+        if (item.getInt("volume") >= 50 && item.getDouble("highPrice") >= 2000000) {
+            // Inv type with a small volume
+            return true;
+        } else if (item.getInt("volume") >= 500 && item.getDouble("highPrice") >= 1000000) {
+            // Inv type with a high volume
+            return true;
+        }
+        return false;
     }
 }
