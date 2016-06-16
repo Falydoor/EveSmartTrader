@@ -14,12 +14,12 @@ import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
 import com.smarttrader.service.dto.TradeDTO;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,7 +82,7 @@ public class MarketOrderService {
             HttpClientBuilder client = HttpClientBuilder.create();
             HttpGet request = new HttpGet(url);
             CloseableHttpResponse response = client.build().execute(request);
-            JSONObject jsonObject = new JSONObject(IOUtils.toString(response.getEntity().getContent()));
+            JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
 
             // Save all market orders that are sellable
             JSONArray items = jsonObject.getJSONArray("items");

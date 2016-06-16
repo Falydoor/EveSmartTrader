@@ -9,11 +9,11 @@ import com.smarttrader.repository.InvMarketGroupRepository;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,7 +86,7 @@ public class SellableInvTypeService {
                 String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
                 HttpGet request = new HttpGet(url);
                 CloseableHttpResponse response = client.build().execute(request);
-                JSONObject jsonObject = new JSONObject(IOUtils.toString(response.getEntity().getContent()));
+                JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
                 JSONArray items = jsonObject.getJSONArray("items");
                 for (int i = items.length() - 1; i > Math.max(0, items.length() - 31); --i) {
                     JSONObject item = items.optJSONObject(i);
