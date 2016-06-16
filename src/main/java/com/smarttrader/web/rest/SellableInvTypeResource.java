@@ -172,4 +172,14 @@ public class SellableInvTypeResource {
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/sellable-inv-types/reload",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<Void> reloadSellableInvType() {
+        log.debug("REST request to reload all SellableInvType");
+        sellableInvTypeService.retrieveSellableInvType();
+        return ResponseEntity.ok().headers(HeaderUtil.createAlert("All sellable inv type reloaded", null)).build();
+    }
+
 }

@@ -7,6 +7,7 @@ import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.enums.Region;
 import com.smarttrader.repository.InvMarketGroupRepository;
 import com.smarttrader.repository.InvTypeRepository;
+import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -47,10 +48,17 @@ public class SellableInvTypeService {
     @Inject
     private InvMarketGroupRepository invMarketGroupRepository;
 
+    @Inject
+    private MarketOrderRepository marketOrderRepository;
+
     @Scheduled(cron = "0 0 0 * * ?")
     public void retrieveSellableInvType() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
+
+        // Delete market orders
+        marketOrderRepository.deleteAllInBatch();
+        marketOrderRepository.flush();
 
         // Delete old sellable inv types
         sellableInvTypeRepository.deleteAllInBatch();

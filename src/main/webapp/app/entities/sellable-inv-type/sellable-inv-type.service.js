@@ -18,7 +18,8 @@
                     return data;
                 }
             },
-            'update': { method:'PUT' }
+            'update': { method:'PUT' },
+            'reload': { method: 'GET', url: 'api/sellable-inv-types/reload' }
         });
     }
 })();

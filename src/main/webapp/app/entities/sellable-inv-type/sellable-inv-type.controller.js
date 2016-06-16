@@ -19,6 +19,11 @@
         vm.searchQuery = pagingParams.search;
         vm.currentSearch = pagingParams.search;
         vm.loadAll();
+        vm.reloadSellableInvType = function () {
+            SellableInvType.reload({}, function () {
+                vm.loadAll();
+            });
+        };
 
         function loadAll () {
             if (pagingParams.search) {
