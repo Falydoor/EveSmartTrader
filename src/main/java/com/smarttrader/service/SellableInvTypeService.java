@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -100,22 +101,18 @@ public class SellableInvTypeService {
 
     private void getHistory(Set<SellableInvType> sellableInvTypes, int invTypesSize, InvType invType, String url, int tries) {
         try {
-            int j = 0;
             SellableInvType sellableInvType = new SellableInvType();
             sellableInvType.setInvType(invType);
             HttpGet request = new HttpGet(url);
             CloseableHttpResponse response = client.execute(request);
             JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
             JSONArray items = jsonObject.getJSONArray("items");
+            List<JSONObject> histories = new ArrayList<>();
             for (int i = items.length() - 1; i > Math.max(0, items.length() - 31); --i) {
-                JSONObject item = items.optJSONObject(i);
-                if (isHistorySellable(item)) {
-                    ++j;
-                }
-                if (j > 14) {
-                    sellableInvTypes.add(sellableInvType);
-                    break;
-                }
+                histories.add(items.optJSONObject(i));
+            }
+            if (histories.stream().filter(this::isHistorySellable).count() > 14) {
+                sellableInvTypes.add(sellableInvType);
             }
             ++index;
             double tempPercent = Math.floor(100 * index / invTypesSize);
@@ -135,13 +132,17 @@ public class SellableInvTypeService {
         }
     }
 
-    private boolean isHistorySellable(JSONObject item) throws JSONException {
-        if (item.getInt("volume") >= 50 && item.getDouble("highPrice") >= 2000000) {
-            // Inv type with a small volume
-            return true;
-        } else if (item.getInt("volume") >= 500 && item.getDouble("highPrice") >= 1000000) {
-            // Inv type with a high volume
-            return true;
+    private boolean isHistorySellable(JSONObject history) {
+        try {
+            if (history.getInt("volume") >= 50 && history.getDouble("highPrice") >= 2000000) {
+                // Inv type with a small volume
+                return true;
+            } else if (history.getInt("volume") >= 500 && history.getDouble("highPrice") >= 1000000) {
+                // Inv type with a high volume
+                return true;
+            }
+        } catch (JSONException e) {
+            log.error("Error parsing history", e);
         }
         return false;
     }
