@@ -1,6 +1,5 @@
 package com.smarttrader.service;
 
-import com.smarttrader.domain.InvMarketGroup;
 import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.Referential;
 import com.smarttrader.domain.SellableInvType;
@@ -9,6 +8,7 @@ import com.smarttrader.repository.InvMarketGroupRepository;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,11 +55,29 @@ public class SellableInvTypeService {
     @Inject
     private MarketOrderRepository marketOrderRepository;
 
+    private List<InvType> marketableInvTypes;
+
     private CloseableHttpClient client = HttpClientBuilder.create().build();
 
     private int index;
 
     private double percent;
+
+    @PostConstruct
+    private void init() {
+        marketableInvTypes = invTypeRepository.findByInvMarketGroupNotNull().parallelStream().filter(invType -> {
+            String result = invMarketGroupRepository.getMainParentMarketGroup(invType.getInvMarketGroup().getId());
+            String[] mainParentMarketGroupResult = StringUtils.split(result, '_');
+            if (mainParentMarketGroupResult != null && mainParentMarketGroupResult.length > 1) {
+                boolean isMarketable = Referential.SELLABLE_PARENT_GROUP.contains(Long.parseLong(mainParentMarketGroupResult[0])) && invType.getVolume() <= 1000;
+                if (isMarketable) {
+                    Referential.GROUP_PARENT_NAME_BY_TYPE_ID.put(invType.getId(), mainParentMarketGroupResult[1]);
+                    return true;
+                }
+            }
+            return false;
+        }).collect(Collectors.toList());
+    }
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void retrieveSellableInvType() {
@@ -77,19 +96,9 @@ public class SellableInvTypeService {
         sellableInvTypeRepository.flush();
 
         Set<SellableInvType> sellableInvTypes = new HashSet<>();
-        List<InvType> invTypes = invTypeRepository.findByInvMarketGroupNotNull().parallelStream().filter(invType -> {
-            long mainParentGroupID = invType.getInvMarketGroup().getId();
-            Long parentGroupID = invType.getInvMarketGroup().getParentGroupID();
-            while (parentGroupID != null) {
-                InvMarketGroup invMarketGroup = invMarketGroupRepository.findOne(parentGroupID);
-                mainParentGroupID = parentGroupID;
-                parentGroupID = invMarketGroup.getParentGroupID();
-            }
-            return Referential.SELLABLE_PARENT_GROUP.contains(mainParentGroupID) && invType.getVolume() <= 1000;
-        }).collect(Collectors.toList());
-        invTypes.parallelStream().forEach(invType -> {
+        marketableInvTypes.parallelStream().forEach(invType -> {
             String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
-            getHistory(sellableInvTypes, invTypes.size(), invType, url, 1);
+            getHistory(sellableInvTypes, marketableInvTypes.size(), invType, url, 1);
         });
 
         log.info("Saving sellable inv type");

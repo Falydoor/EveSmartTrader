@@ -135,20 +135,6 @@ public class AccountResource {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<UserDTO> getAccount() {
-        // Init referential
-        if (Referential.GROUP_PARENT_NAME_BY_TYPE_ID.isEmpty()) {
-            Referential.GROUP_PARENT_NAME_BY_TYPE_ID = invTypeRepository.findByInvMarketGroupNotNull().stream().collect(Collectors.toMap(InvType::getId, invType -> {
-                String mainParentName = invType.getInvMarketGroup().getMarketGroupName();
-                Long parentGroupID = invType.getInvMarketGroup().getParentGroupID();
-                while (parentGroupID != null) {
-                    InvMarketGroup invMarketGroup = invMarketGroupRepository.findOne(parentGroupID);
-                    mainParentName = invMarketGroup.getMarketGroupName();
-                    parentGroupID = invMarketGroup.getParentGroupID();
-                }
-                return mainParentName;
-            }));
-        }
-
         return Optional.ofNullable(userService.getUserWithAuthorities())
             .map(user -> new ResponseEntity<>(new UserDTO(user), HttpStatus.OK))
             .orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));

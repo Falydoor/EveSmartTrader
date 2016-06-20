@@ -177,6 +177,10 @@
                                  referencedColumnNames="event_id"
                                  referencedTableName="jhi_persistent_audit_event"/>
 
+        <createProcedure dbms="postgresql"
+                         encoding="UTF-8"
+                         path="config/liquibase/functions.sql"/>
+
     </changeSet>
 
 </databaseChangeLog>
