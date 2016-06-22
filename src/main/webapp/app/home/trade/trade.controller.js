@@ -5,44 +5,39 @@
         .module('eveSmartTraderApp')
         .controller('TradeController', TradeController);
 
-    TradeController.$inject = ['$scope', '$state', 'Trade', 'clipboard', 'Principal'];
+    TradeController.$inject = ['$scope', '$state', 'Trade', 'clipboard', 'identity'];
 
-    function TradeController($scope, $state, Trade, clipboard, Principal) {
+    function TradeController($scope, $state, Trade, clipboard, identity) {
         var vm = this;
-        Principal.identity().then(function (account) {
-            vm.stations = account.stations;
-            vm.station = 'JitaHUB';
-            vm.sellerStation = 'AmarrHUB';
-            vm.loadTrades();
-        });
+        vm.stations = identity.stations;
+        vm.station = vm.stations[3];
+        vm.sellerStation = vm.stations[0];
         vm.showHubTrades = true;
         vm.showPenuryTrades = false;
         vm.showStationTrades = false;
+        vm.loadTrades = loadTrades;
+        vm.loadTrades();
+        vm.copy = copy;
 
-        vm.copy = function (name, $event) {
-            $($event.currentTarget).closest('tr').removeClass('danger').addClass('success');
-            clipboard.copyText(name);
-        };
-        vm.loadTrades = function () {
-            vm.hubTradesSize = undefined;
-            vm.penuryTradesSize = undefined;
-            vm.stationTradesSize = undefined;
-            vm.hubTrades = [];
-            vm.penuryTrades = [];
-            vm.stationTrades = [];
+        function copy(trade) {
+            trade.copied = true;
+            clipboard.copyText(trade.name);
+        }
+
+        function loadTrades() {
+            vm.hubTrades = undefined;
+            vm.penuryTrades = undefined;
+            vm.stationTrades = undefined;
             Trade.hubTrades({station: vm.station}, function (trades) {
                 vm.hubTrades = trades;
-                vm.hubTradesSize = trades.length;
             });
             Trade.penuryTrades({station: vm.station}, function (trades) {
                 vm.penuryTrades = trades;
-                vm.penuryTradesSize = trades.length;
-                vm.showPenuryTrades = vm.penuryTradesSize > 0;
+                vm.showPenuryTrades = vm.penuryTrades.length.penuryTradesSize > 0;
             });
             Trade.stationTrades({station: vm.station}, function (trades) {
                 vm.stationTrades = trades;
-                vm.stationTradesSize = trades.length;
             });
-        };
+        }
     }
 })();

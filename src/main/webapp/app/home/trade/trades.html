@@ -8,8 +8,8 @@
                 ng-change="vm.loadTrades()">
         </select>
     </h4>
-    <h2 ng-click="vm.showPenuryTrades = !vm.showPenuryTrades" class="pointer">{{vm.penuryTradesSize !== undefined ?
-        vm.penuryTradesSize + ' ' :
+    <h2 ng-click="vm.showPenuryTrades = !vm.showPenuryTrades" class="pointer">{{vm.penuryTrades !== undefined ?
+        vm.penuryTrades.length + ' ' :
         'Loading '}}Penury
         Trades
         {{vm.showPenuryTrades ? '' : '(hided)'}}
@@ -25,11 +25,11 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="trade in vm.penuryTrades">
+        <tr ng-repeat="trade in vm.penuryTrades" class="{{trade.copied ? 'success' : ''}}">
             <td><span class="label label-warning">{{trade.groupName}}</span></td>
             <td>
                 <span>
-                    <button ng-click="vm.copy(trade.name, $event)" type="button" class="btn btn-default btn-xs">
+                    <button ng-click="vm.copy(trade)" type="button" class="btn btn-default btn-xs">
                         <span class="glyphicon glyphicon-copy"></span>
                     </button>
                     {{trade.name}}
@@ -46,8 +46,8 @@
         </tr>
         </tbody>
     </table>
-    <h2 ng-click="vm.showStationTrades = !vm.showStationTrades" class="pointer">{{vm.stationTradesSize !== undefined ?
-        vm.stationTradesSize + ' ' :
+    <h2 ng-click="vm.showStationTrades = !vm.showStationTrades" class="pointer">{{vm.stationTrades !== undefined ?
+        vm.stationTrades.length + ' ' :
         'Loading '}}Station
         Trades
         {{vm.showStationTrades ? '' : '(hided)'}}
@@ -64,14 +64,14 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="trade in vm.stationTrades" class="{{trade.inMarket ? 'danger' : ''}}">
+        <tr ng-repeat="trade in vm.stationTrades" class="{{trade.copied ? 'success' : trade.inMarket ? 'danger' : ''}}">
             <td><span class="label label-info">{{trade.profit | number}} ISK</span></td>
             <td><span class="label label-primary">{{trade.sellPrice | number}} ISK</span></td>
             <td><span class="label label-success">{{trade.percentProfit}} %</span></td>
             <td><span class="label label-warning">{{trade.groupName}}</span></td>
             <td>
                 <span>
-                    <button ng-click="vm.copy(trade.name, $event)" type="button" class="btn btn-default btn-xs">
+                    <button ng-click="vm.copy(trade)" type="button" class="btn btn-default btn-xs">
                         <span class="glyphicon glyphicon-copy"></span>
                     </button>
                     {{trade.name}}
@@ -86,8 +86,8 @@
         </tr>
         </tbody>
     </table>
-    <h2 ng-click="vm.showHubTrades = !vm.showHubTrades" class="pointer">{{vm.hubTradesSize !== undefined ?
-        vm.hubTradesSize + ' ' :
+    <h2 ng-click="vm.showHubTrades = !vm.showHubTrades" class="pointer">{{vm.hubTrades !== undefined ?
+        vm.hubTrades.length + ' ' :
         'Loading '}}Hub
         Trades
         {{vm.showHubTrades ? '' : '(hided)'}}
@@ -110,7 +110,7 @@
         </thead>
         <tbody>
         <tr ng-show="trade.station === vm.sellerStation" ng-repeat="trade in vm.hubTrades"
-            class="{{trade.inMarket ? 'danger' : ''}}">
+            class="{{trade.copied ? 'success' : trade.inMarket ? 'danger' : ''}}">
             <td><span class="label label-info">{{trade.profit | number}} ISK</span></td>
             <td><span class="label label-primary">{{trade.totalProfit | number}} ISK</span></td>
             <td><span class="label label-success">{{trade.totalPrice | number}} ISK</span></td>
@@ -120,7 +120,7 @@
             <td><span class="label label-warning">{{trade.groupName}}</span></td>
             <td>
                 <span>
-                    <button ng-click="vm.copy(trade.name, $event)" type="button" class="btn btn-default btn-xs">
+                    <button ng-click="vm.copy(trade)" type="button" class="btn btn-default btn-xs">
                         <span class="glyphicon glyphicon-copy"></span>
                     </button>
                     {{trade.name}}

@@ -1,4 +1,4 @@
-(function() {
+(function () {
     'use strict';
 
     angular
@@ -18,7 +18,12 @@
                 'content@': {
                     templateUrl: 'app/home/trade/trades.html',
                     controller: 'TradeController',
-                    controllerAs: 'vm'
+                    controllerAs: 'vm',
+                    resolve: {
+                        identity: ['$stateParams', 'Principal', function ($stateParams, Principal) {
+                            return Principal.identity();
+                        }]
+                    }
                 }
             }
         });
