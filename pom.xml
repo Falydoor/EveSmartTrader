@@ -59,8 +59,8 @@
         <run.addResources>false</run.addResources>
         <spring-security.version>4.0.4.RELEASE</spring-security.version>
         <springfox.version>2.4.0</springfox.version>
-        <apache-httpcomponents>4.5.1</apache-httpcomponents>
-        <eveapi>6.0.0</eveapi>
+        <apache-httpcomponents.version>4.5.1</apache-httpcomponents.version>
+        <eveapi.version>6.0.0</eveapi.version>
         <!-- Sonar properties -->
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <sonar-maven-plugin.version>2.7.1</sonar-maven-plugin.version>
@@ -393,12 +393,12 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>${apache-httpcomponents}</version>
+            <version>${apache-httpcomponents.version}</version>
         </dependency>
         <dependency>
             <groupId>com.beimin</groupId>
             <artifactId>eveapi</artifactId>
-            <version>${eveapi}</version>
+            <version>${eveapi.version}</version>
         </dependency>
     </dependencies>
     <build>
