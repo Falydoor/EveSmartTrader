@@ -1,9 +1,8 @@
 package com.smarttrader.domain;
 
+import com.google.gson.JsonObject;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
@@ -72,17 +71,17 @@ public class MarketOrder implements Serializable {
     public MarketOrder() {
     }
 
-    public MarketOrder(JSONObject json) throws JSONException {
-        buy = json.getBoolean("buy");
-        issued = ZonedDateTime.parse(json.getString("issued") + "+00:00", DateTimeFormatter.ISO_DATE_TIME);
-        price = json.getDouble("price");
-        volumeEntered = json.getInt("volumeEntered");
-        stationID = json.getLong("stationID");
-        volume = json.getLong("volume");
-        range = json.getString("range");
-        minVolume = json.getInt("minVolume");
-        duration = json.getInt("duration");
-        id = json.getLong("id");
+    public MarketOrder(JsonObject json) {
+        buy = json.get("buy").getAsBoolean();
+        issued = ZonedDateTime.parse(json.get("issued").getAsString() + "+00:00", DateTimeFormatter.ISO_DATE_TIME);
+        price = json.get("price").getAsDouble();
+        volumeEntered = json.get("volumeEntered").getAsInt();
+        stationID = json.get("stationID").getAsLong();
+        volume = json.get("volume").getAsLong();
+        range = json.get("range").getAsString();
+        minVolume = json.get("minVolume").getAsInt();
+        duration = json.get("duration").getAsInt();
+        id = json.get("id").getAsLong();
     }
 
     public Long getId() {

@@ -4,12 +4,16 @@ import com.beimin.eveapi.exception.ApiException;
 import com.beimin.eveapi.parser.ApiAuthorization;
 import com.beimin.eveapi.parser.pilot.MarketOrdersParser;
 import com.beimin.eveapi.response.shared.MarketOrdersResponse;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.smarttrader.domain.MarketOrder;
 import com.smarttrader.domain.Referential;
 import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.User;
 import com.smarttrader.domain.enums.Region;
 import com.smarttrader.domain.enums.Station;
+import com.smarttrader.domain.util.GsonBean;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
@@ -21,8 +25,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,6 +36,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Service class for managing market orders.
@@ -56,6 +59,11 @@ public class MarketOrderService {
     @Inject
     private UserService userService;
 
+    @Inject
+    private GsonBean gsonBean;
+
+    private Map<Long, SellableInvType> sellableByTypeId;
+
     @Scheduled(cron = "0 0/30 * * * ?")
     public void retrieveMarketOrders() {
         StopWatch stopWatch = new StopWatch();
@@ -65,49 +73,42 @@ public class MarketOrderService {
         marketOrderRepository.deleteAllInBatch();
         marketOrderRepository.flush();
 
-        Map<Long, SellableInvType> sellableByTypeId = sellableInvTypeRepository.findAll().stream()
+        sellableByTypeId = sellableInvTypeRepository.findAll().stream()
             .collect(Collectors.toMap(sellableInvType -> sellableInvType.getInvType().getId(), sellableInvType -> sellableInvType));
 
         Set<MarketOrder> marketOrders = new HashSet<>();
         Arrays.stream(Region.values()).parallel()
-            .forEach(region -> retrieveMarketOrders(marketOrders, region, sellableByTypeId, Referential.CREST_URL + "market/" + region.getId() + "/orders/all/", 1));
+            .forEach(region -> retrieveMarketOrders(marketOrders, region, Referential.CREST_URL + "market/" + region.getId() + "/orders/all/", 1));
         marketOrderRepository.save(marketOrders);
         marketOrderRepository.flush();
         stopWatch.stop();
         log.info("Retrieved market orders in {}ms", stopWatch.getTime());
     }
 
-    private void retrieveMarketOrders(Set<MarketOrder> marketOrders, Region region, Map<Long, SellableInvType> sellableByTypeId, String url, int page) {
+    private void retrieveMarketOrders(Set<MarketOrder> marketOrders, Region region, String url, int page) {
         try {
             HttpClientBuilder client = HttpClientBuilder.create();
             HttpGet request = new HttpGet(url);
             CloseableHttpResponse response = client.build().execute(request);
-            JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
+
+            // Parse json
+            JsonObject json = gsonBean.parse(EntityUtils.toString(response.getEntity()));
+            JsonArray items = json.getAsJsonArray("items");
 
             // Save all market orders that are sellable
-            JSONArray items = jsonObject.getJSONArray("items");
-            for (int i = 0; i < items.length(); i++) {
-                JSONObject item = items.optJSONObject(i);
-                long typeID = item.getLong("type");
-                SellableInvType sellableInvType = sellableByTypeId.get(typeID);
-                if (sellableInvType == null || Station.fromLong(item.getLong("stationID")) != Station.getStationWithRegion(region)) {
-                    continue;
-                }
-                MarketOrder marketOrder = new MarketOrder(item);
-                marketOrder.setSellableInvType(sellableInvType);
-                marketOrder.setInvType(invTypeRepository.getOne(typeID));
-                marketOrders.add(marketOrder);
-            }
-            log.info("Market orders {}'s pages : {}/{}", region, page, jsonObject.getInt("pageCount"));
+            marketOrders.addAll(StreamSupport.stream(items.spliterator(), false)
+                .map(JsonElement::getAsJsonObject)
+                .filter(this::isSellableAndStationIsHub)
+                .map(this::createMarketOrder)
+                .collect(Collectors.toList()));
+            log.info("Market orders {}'s pages : {}/{}", region, page, json.get("pageCount").getAsInt());
 
             // Retrieve next page
-            if (!jsonObject.isNull("next")) {
-                retrieveMarketOrders(marketOrders, region, sellableByTypeId, jsonObject.getJSONObject("next").getString("href"), ++page);
+            if (json.has("next")) {
+                retrieveMarketOrders(marketOrders, region, json.get("next").getAsJsonObject().get("href").getAsString(), ++page);
             }
         } catch (IOException e) {
             log.error("Error getting market orders from URL", e);
-        } catch (JSONException e) {
-            log.error("Error parsing market orders", e);
         }
     }
 
@@ -215,5 +216,17 @@ public class MarketOrderService {
             log.error("Unable to retrieve user's market orders", e);
         }
         return new HashSet<>();
+    }
+
+    private boolean isSellableAndStationIsHub(JsonObject item) {
+        return sellableByTypeId.containsKey(item.get("type").getAsLong()) && Station.fromLong(item.get("stationID").getAsLong()).isPresent();
+    }
+
+    private MarketOrder createMarketOrder(JsonObject item) {
+        long typeID = item.get("type").getAsLong();
+        MarketOrder marketOrder = new MarketOrder(item);
+        marketOrder.setSellableInvType(sellableByTypeId.get(typeID));
+        marketOrder.setInvType(invTypeRepository.getOne(typeID));
+        return marketOrder;
     }
 }

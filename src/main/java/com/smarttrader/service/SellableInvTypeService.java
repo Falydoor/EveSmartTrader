@@ -1,5 +1,8 @@
 package com.smarttrader.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.Referential;
 import com.smarttrader.domain.SellableInvType;
@@ -8,6 +11,7 @@ import com.smarttrader.repository.InvMarketGroupRepository;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
+import com.smarttrader.domain.util.GsonBean;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -16,9 +20,6 @@ import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,11 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Service class for managing sellable inv types.
@@ -54,6 +55,9 @@ public class SellableInvTypeService {
 
     @Inject
     private MarketOrderRepository marketOrderRepository;
+
+    @Inject
+    private GsonBean gsonBean;
 
     private List<InvType> marketableInvTypes;
 
@@ -96,10 +100,7 @@ public class SellableInvTypeService {
         sellableInvTypeRepository.flush();
 
         Set<SellableInvType> sellableInvTypes = new HashSet<>();
-        marketableInvTypes.parallelStream().forEach(invType -> {
-            String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
-            getHistory(sellableInvTypes, marketableInvTypes.size(), invType, url, 1);
-        });
+        marketableInvTypes.parallelStream().forEach(invType -> getHistory(sellableInvTypes, marketableInvTypes.size(), invType, 1));
 
         log.info("Saving sellable inv type");
         sellableInvTypeRepository.save(sellableInvTypes);
@@ -108,19 +109,26 @@ public class SellableInvTypeService {
         log.info("Retrieved sellable inv type in {}ms", stopWatch.getTime());
     }
 
-    private void getHistory(Set<SellableInvType> sellableInvTypes, int invTypesSize, InvType invType, String url, int tries) {
+    private void getHistory(Set<SellableInvType> sellableInvTypes, int invTypesSize, InvType invType, int tries) {
+        String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
         try {
             SellableInvType sellableInvType = new SellableInvType();
             sellableInvType.setInvType(invType);
             HttpGet request = new HttpGet(url);
             CloseableHttpResponse response = client.execute(request);
-            JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
-            JSONArray items = jsonObject.getJSONArray("items");
-            List<JSONObject> histories = new ArrayList<>();
-            for (int i = items.length() - 1; i > Math.max(0, items.length() - 31); --i) {
-                histories.add(items.optJSONObject(i));
-            }
-            if (histories.stream().filter(this::isHistorySellable).count() > 14) {
+
+            // Parse json
+            JsonObject json = gsonBean.parse(EntityUtils.toString(response.getEntity()));
+            JsonArray items = json.getAsJsonArray("items");
+
+            // Test history from last month. An item is sellable if 15 history day match the isHistorySellable function
+            Boolean isSellable = StreamSupport.stream(items.spliterator(), false)
+                .skip(Math.max(0, items.size() - 31))
+                .map(JsonElement::getAsJsonObject)
+                .filter(this::isHistorySellable)
+                .count() > 14;
+
+            if (isSellable) {
                 sellableInvTypes.add(sellableInvType);
             }
             ++index;
@@ -132,27 +140,26 @@ public class SellableInvTypeService {
         } catch (ConnectTimeoutException e) {
             log.info("Timeout on {} try {}", url, tries);
             if (tries < 6) {
-                getHistory(sellableInvTypes, invTypesSize, invType, url, ++tries);
+                getHistory(sellableInvTypes, invTypesSize, invType, ++tries);
             }
         } catch (IOException e) {
             log.error("Error getting sellable inv types from URL", e);
-        } catch (JSONException e) {
-            log.error("Error parsing sellable inv types", e);
         }
     }
 
-    private boolean isHistorySellable(JSONObject history) {
-        try {
-            if (history.getInt("volume") >= 50 && history.getDouble("highPrice") >= 2000000) {
-                // Inv type with a small volume
-                return true;
-            } else if (history.getInt("volume") >= 500 && history.getDouble("highPrice") >= 1000000) {
-                // Inv type with a high volume
-                return true;
-            }
-        } catch (JSONException e) {
-            log.error("Error parsing history", e);
+    private boolean isHistorySellable(JsonObject history) {
+        int volume = history.get("volume").getAsInt();
+        double highPrice = history.get("highPrice").getAsDouble();
+
+        // Inv type with a small volume and high price
+        if (volume >= 50 && highPrice >= 2000000) {
+            return true;
         }
+        // Inv type with a high volume and low price
+        if (volume >= 500 && highPrice >= 1000000) {
+            return true;
+        }
+
         return false;
     }
 }

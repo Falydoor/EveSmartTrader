@@ -61,6 +61,7 @@
         <springfox.version>2.4.0</springfox.version>
         <apache-httpcomponents.version>4.5.1</apache-httpcomponents.version>
         <eveapi.version>6.0.0</eveapi.version>
+        <gson.version>2.7</gson.version>
         <!-- Sonar properties -->
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <sonar-maven-plugin.version>2.7.1</sonar-maven-plugin.version>
@@ -399,6 +400,11 @@
             <groupId>com.beimin</groupId>
             <artifactId>eveapi</artifactId>
             <version>${eveapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
         </dependency>
     </dependencies>
     <build>
