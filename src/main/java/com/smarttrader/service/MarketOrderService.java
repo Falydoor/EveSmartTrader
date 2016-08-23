@@ -7,10 +7,7 @@ import com.beimin.eveapi.response.shared.MarketOrdersResponse;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.smarttrader.domain.MarketOrder;
-import com.smarttrader.domain.Referential;
-import com.smarttrader.domain.SellableInvType;
-import com.smarttrader.domain.User;
+import com.smarttrader.domain.*;
 import com.smarttrader.domain.enums.Region;
 import com.smarttrader.domain.enums.Station;
 import com.smarttrader.domain.util.GsonBean;
@@ -24,7 +21,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -112,90 +108,69 @@ public class MarketOrderService {
         }
     }
 
-    public JSONArray buildHubTrades(Station station) {
-        Set<Long> invTypeInUserMarket = getInvTypeInUserMarket(station.getId(), 0);
-        List<Station> sellStations = Arrays.stream(Station.values()).filter(sellStation -> sellStation != station).collect(Collectors.toList());
-        List<TradeDTO> trades = new ArrayList<>();
+    public List<TradeDTO> buildHubTrades(Station station) {
+        List<Station> stations = Arrays.stream(Station.values()).filter(sellStation -> sellStation != station).collect(Collectors.toList());
+        Set<Long> userMarket = getInvTypeInUserMarket(station.getId(), 0);
 
-        sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).forEach(sellableInvType -> {
-            List<MarketOrder> sellOrders = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType());
-            Map<Long, List<MarketOrder>> sellOrdersByStation = sellOrders.stream().collect(Collectors.groupingBy(MarketOrder::getStationID));
-            List<MarketOrder> cheapestBuy = sellOrdersByStation.get(station.getId());
+        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).stream()
+            .map(sellableInvType -> {
+                List<MarketOrder> sellOrders = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType());
+                Map<Long, List<MarketOrder>> sellOrdersByStation = sellOrders.stream().collect(Collectors.groupingBy(MarketOrder::getStationID));
+                List<MarketOrder> cheapestBuy = sellOrdersByStation.get(station.getId());
 
-            sellStations.forEach(sellStation -> {
-                List<MarketOrder> cheapestSell = sellOrdersByStation.get(sellStation.getId());
-                if (!CollectionUtils.isEmpty(cheapestBuy) && !CollectionUtils.isEmpty(cheapestSell) && cheapestSell.get(0).getPrice() < cheapestBuy.get(0).getPrice()) {
-                    Double cheapestSellPrice = cheapestSell.get(0).getPrice();
-                    Double cheapestBuyPrice = cheapestBuy.get(0).getPrice();
-                    List<MarketOrder> sellables = cheapestSell.stream().filter(marketOrder -> marketOrder.getPrice() < Math.min(cheapestSellPrice * 1.1D, cheapestBuyPrice)).collect(Collectors.toList());
-                    TradeDTO trade = new TradeDTO();
-                    trade.setTotalPrice(Double.valueOf(sellables.stream().mapToDouble(value -> value.getPrice() * value.getVolume()).sum()).longValue());
-                    trade.setTotalProfit(Double.valueOf(sellables.stream().mapToDouble(value -> (cheapestBuyPrice - value.getPrice()) * value.getVolume()).sum()).longValue());
-                    trade.setTotalQuantity(sellables.stream().mapToLong(MarketOrder::getVolume).sum());
-                    trade.setTotalVolume(Double.valueOf(trade.getTotalQuantity() * sellableInvType.getInvType().getVolume()).longValue());
-                    trade.setSellPrice(cheapestBuyPrice.longValue());
-                    trade.setPercentProfit(100 * trade.getTotalProfit() / trade.getTotalPrice());
-                    trade.setProfit(Double.valueOf(cheapestBuyPrice - cheapestSellPrice).longValue());
-                    trade.setName(sellableInvType.getInvType().getTypeName());
-                    trade.setGroupName(Referential.GROUP_PARENT_NAME_BY_TYPE_ID.get(sellableInvType.getInvType().getId()));
-                    trade.setStation(sellStation.toString());
-                    trade.setTypeId(sellableInvType.getInvType().getId());
-                    trade.setInMarket(invTypeInUserMarket.contains(trade.getTypeId()));
-                    trades.add(trade);
-                }
-            });
-
-        });
-
-        trades.sort((t1, t2) -> t2.getPercentProfit().compareTo(t1.getPercentProfit()));
-
-        return new JSONArray(trades);
+                return stations.stream()
+                    .filter(sellStation -> isCheapestThanBuyStation(sellOrdersByStation.get(sellStation.getId()), cheapestBuy))
+                    .map(sellStation -> {
+                        List<MarketOrder> cheapestSell = sellOrdersByStation.get(sellStation.getId());
+                        Double cheapestSellPrice = cheapestSell.get(0).getPrice();
+                        Double cheapestBuyPrice = cheapestBuy.get(0).getPrice();
+                        double thresholdPrice = Math.min(cheapestSellPrice * 1.1D, cheapestBuyPrice);
+                        List<MarketOrder> sellables = cheapestSell.stream().filter(marketOrder -> marketOrder.getPrice() < thresholdPrice).collect(Collectors.toList());
+                        return new TradeDTO(sellableInvType.getInvType(), sellables, cheapestBuyPrice, cheapestSellPrice, userMarket, sellStation);
+                    })
+                    .collect(Collectors.toList());
+            })
+            .flatMap(Collection::stream)
+            .sorted((t1, t2) -> t2.getPercentProfit().compareTo(t1.getPercentProfit()))
+            .collect(Collectors.toList());
     }
 
-    public JSONArray buildPenuryTrades(Station station) {
-        List<TradeDTO> trades = new ArrayList<>();
-
-        sellableInvTypeRepository.findAll().stream()
+    public List<TradeDTO> buildPenuryTrades(Station station) {
+        return sellableInvTypeRepository.findAll().stream()
             .filter(sellableInvType -> marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(sellableInvType.getInvType(), station.getId()) == 0)
-            .forEach(sellableInvType -> {
-                TradeDTO trade = new TradeDTO();
-                trade.setTypeId(sellableInvType.getInvType().getId());
-                trade.setName(sellableInvType.getInvType().getTypeName());
-                trade.setGroupName(Referential.GROUP_PARENT_NAME_BY_TYPE_ID.get(sellableInvType.getInvType().getId()));
-                trade.setStation(station.toString());
-                trade.setTotalVolume(sellableInvType.getInvType().getVolume().longValue());
-                trades.add(trade);
-            });
-
-        return new JSONArray(trades);
+            .map(sellableInvType -> new TradeDTO(sellableInvType.getInvType(), station))
+            .collect(Collectors.toList());
     }
 
-    public JSONArray buildStationTrades(Station station) {
-        Set<Long> invTypeInUserMarket = getInvTypeInUserMarket(station.getId(), 1);
-        List<TradeDTO> trades = new ArrayList<>();
+    public List<TradeDTO> buildStationTrades(Station station) {
+        Set<Long> userMarket = getInvTypeInUserMarket(station.getId(), 1);
 
-        sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).forEach(sellableInvType -> {
-            Optional<MarketOrder> cheapestSell = marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(sellableInvType.getInvType(), station.getId());
-            Optional<MarketOrder> costliestBuy = marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(sellableInvType.getInvType(), station.getId());
+        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).stream()
+            .map(sellableInvType -> createStationTrade(sellableInvType.getInvType(), station.getId(), userMarket))
+            .filter(this::isProfitable)
+            .sorted((t1, t2) -> t2.getProfit().compareTo(t1.getProfit()))
+            .collect(Collectors.toList());
+    }
 
-            if (cheapestSell.isPresent() && costliestBuy.isPresent()) {
-                TradeDTO trade = new TradeDTO();
-                trade.setProfit(Double.valueOf(cheapestSell.get().getPrice() - costliestBuy.get().getPrice()).longValue());
-                trade.setSellPrice(costliestBuy.get().getPrice().longValue());
-                trade.setPercentProfit(100 * trade.getProfit() / trade.getSellPrice());
-                if (trade.getPercentProfit() >= 10) {
-                    trade.setName(sellableInvType.getInvType().getTypeName());
-                    trade.setGroupName(Referential.GROUP_PARENT_NAME_BY_TYPE_ID.get(sellableInvType.getInvType().getId()));
-                    trade.setTypeId(sellableInvType.getInvType().getId());
-                    trade.setInMarket(invTypeInUserMarket.contains(trade.getTypeId()));
-                    trades.add(trade);
-                }
-            }
-        });
+    private TradeDTO createStationTrade(InvType invType, Long stationID, Set<Long> userMarket) {
+        Optional<MarketOrder> cheapestSell = findCheapestSellOrder(invType, stationID);
+        Optional<MarketOrder> costliestBuy = findCostliestBuyOrder(invType, stationID);
+        if (cheapestSell.isPresent() && costliestBuy.isPresent()) {
+            return new TradeDTO(invType, cheapestSell.get(), costliestBuy.get(), userMarket);
+        }
+        return null;
+    }
 
-        trades.sort((t1, t2) -> t2.getProfit().compareTo(t1.getProfit()));
+    private boolean isProfitable(TradeDTO trade) {
+        return trade != null && trade.getPercentProfit() >= 10;
+    }
 
-        return new JSONArray(trades);
+    private Optional<MarketOrder> findCheapestSellOrder(InvType invType, Long stationID) {
+        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(invType, stationID);
+    }
+
+    private Optional<MarketOrder> findCostliestBuyOrder(InvType invType, Long stationID) {
+        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(invType, stationID);
     }
 
     private Set<Long> getInvTypeInUserMarket(long stationID, int bid) {
@@ -228,5 +203,9 @@ public class MarketOrderService {
         marketOrder.setSellableInvType(sellableByTypeId.get(typeID));
         marketOrder.setInvType(invTypeRepository.getOne(typeID));
         return marketOrder;
+    }
+
+    private boolean isCheapestThanBuyStation(List<MarketOrder> cheapestSell, List<MarketOrder> cheapestBuy) {
+        return !CollectionUtils.isEmpty(cheapestBuy) && !CollectionUtils.isEmpty(cheapestSell) && cheapestSell.get(0).getPrice() < cheapestBuy.get(0).getPrice();
     }
 }

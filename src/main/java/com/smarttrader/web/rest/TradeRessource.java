@@ -36,7 +36,7 @@ public class TradeRessource {
     @Transactional(readOnly = true)
     public ResponseEntity<JSONArray> getHubTrades(Station station)
         throws URISyntaxException {
-        return new ResponseEntity<>(marketOrderService.buildHubTrades(station), HttpStatus.OK);
+        return new ResponseEntity<>(new JSONArray(marketOrderService.buildHubTrades(station)), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/penuryTrades",
@@ -46,7 +46,7 @@ public class TradeRessource {
     @Transactional(readOnly = true)
     public ResponseEntity<JSONArray> getPenuryTrades(Station station)
         throws URISyntaxException {
-        return new ResponseEntity<>(marketOrderService.buildPenuryTrades(station), HttpStatus.OK);
+        return new ResponseEntity<>(new JSONArray(marketOrderService.buildPenuryTrades(station)), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/stationTrades",
@@ -56,7 +56,7 @@ public class TradeRessource {
     @Transactional(readOnly = true)
     public ResponseEntity<JSONArray> getStationTrades(Station station)
         throws URISyntaxException {
-        return new ResponseEntity<>(marketOrderService.buildStationTrades(station), HttpStatus.OK);
+        return new ResponseEntity<>(new JSONArray(marketOrderService.buildStationTrades(station)), HttpStatus.OK);
     }
 
 }
