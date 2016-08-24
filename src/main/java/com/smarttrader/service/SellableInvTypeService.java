@@ -7,11 +7,14 @@ import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.Referential;
 import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.enums.Region;
+import com.smarttrader.domain.util.GsonBean;
 import com.smarttrader.repository.InvMarketGroupRepository;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
-import com.smarttrader.domain.util.GsonBean;
+import com.smarttrader.repository.search.InvMarketGroupSearchRepository;
+import com.smarttrader.repository.search.InvTypeSearchRepository;
+import com.smarttrader.repository.search.SellableInvTypeSearchRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -29,9 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -48,10 +50,19 @@ public class SellableInvTypeService {
     private SellableInvTypeRepository sellableInvTypeRepository;
 
     @Inject
+    private SellableInvTypeSearchRepository sellableInvTypeSearchRepository;
+
+    @Inject
     private InvTypeRepository invTypeRepository;
 
     @Inject
+    private InvTypeSearchRepository invTypeSearchRepository;
+
+    @Inject
     private InvMarketGroupRepository invMarketGroupRepository;
+
+    @Inject
+    private InvMarketGroupSearchRepository invMarketGroupSearchRepository;
 
     @Inject
     private MarketOrderRepository marketOrderRepository;
@@ -67,6 +78,8 @@ public class SellableInvTypeService {
 
     private double percent;
 
+    private List<SellableInvType> sellableInvTypes;
+
     @PostConstruct
     private void init() {
         marketableInvTypes = invTypeRepository.findByInvMarketGroupNotNull().parallelStream().filter(invType -> {
@@ -81,6 +94,9 @@ public class SellableInvTypeService {
             }
             return false;
         }).collect(Collectors.toList());
+
+        invMarketGroupSearchRepository.save(invMarketGroupRepository.findAll());
+        invTypeSearchRepository.save(invTypeRepository.findAll());
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
@@ -99,17 +115,18 @@ public class SellableInvTypeService {
         sellableInvTypeRepository.deleteAllInBatch();
         sellableInvTypeRepository.flush();
 
-        Set<SellableInvType> sellableInvTypes = new HashSet<>();
-        marketableInvTypes.parallelStream().forEach(invType -> getHistory(sellableInvTypes, marketableInvTypes.size(), invType, 1));
+        sellableInvTypes = new ArrayList<>();
+        marketableInvTypes.parallelStream().forEach(invType -> getHistory(marketableInvTypes.size(), invType, 1));
 
         log.info("Saving sellable inv type");
-        sellableInvTypeRepository.save(sellableInvTypes);
+        sellableInvTypes = sellableInvTypeRepository.save(sellableInvTypes);
         sellableInvTypeRepository.flush();
+        sellableInvTypeSearchRepository.save(sellableInvTypes);
         stopWatch.stop();
         log.info("Retrieved sellable inv type in {}ms", stopWatch.getTime());
     }
 
-    private void getHistory(Set<SellableInvType> sellableInvTypes, int invTypesSize, InvType invType, int tries) {
+    private void getHistory(int invTypesSize, InvType invType, int tries) {
         String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
         try {
             SellableInvType sellableInvType = new SellableInvType();
@@ -140,7 +157,7 @@ public class SellableInvTypeService {
         } catch (ConnectTimeoutException e) {
             log.info("Timeout on {} try {}", url, tries);
             if (tries < 6) {
-                getHistory(sellableInvTypes, invTypesSize, invType, ++tries);
+                getHistory(invTypesSize, invType, ++tries);
             }
         } catch (IOException e) {
             log.error("Error getting sellable inv types from URL", e);

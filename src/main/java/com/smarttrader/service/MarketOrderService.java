@@ -14,6 +14,7 @@ import com.smarttrader.domain.util.GsonBean;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
+import com.smarttrader.repository.search.MarketOrderSearchRepository;
 import com.smarttrader.service.dto.TradeDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -47,6 +48,9 @@ public class MarketOrderService {
     private MarketOrderRepository marketOrderRepository;
 
     @Inject
+    private MarketOrderSearchRepository marketOrderSearchRepository;
+
+    @Inject
     private SellableInvTypeRepository sellableInvTypeRepository;
 
     @Inject
@@ -60,6 +64,8 @@ public class MarketOrderService {
 
     private Map<Long, SellableInvType> sellableByTypeId;
 
+    private List<MarketOrder> marketOrders;
+
     @Scheduled(cron = "0 0/30 * * * ?")
     public void retrieveMarketOrders() {
         StopWatch stopWatch = new StopWatch();
@@ -72,16 +78,18 @@ public class MarketOrderService {
         sellableByTypeId = sellableInvTypeRepository.findAll().stream()
             .collect(Collectors.toMap(sellableInvType -> sellableInvType.getInvType().getId(), sellableInvType -> sellableInvType));
 
-        Set<MarketOrder> marketOrders = new HashSet<>();
-        Arrays.stream(Region.values()).parallel()
-            .forEach(region -> retrieveMarketOrders(marketOrders, region, Referential.CREST_URL + "market/" + region.getId() + "/orders/all/", 1));
-        marketOrderRepository.save(marketOrders);
+        marketOrders = new ArrayList<>();
+        Arrays.stream(Region.values())
+            .parallel()
+            .forEach(region -> retrieveMarketOrders(region, Referential.CREST_URL + "market/" + region.getId() + "/orders/all/", 1));
+        marketOrders = marketOrderRepository.save(marketOrders);
         marketOrderRepository.flush();
+        marketOrderSearchRepository.save(marketOrders);
         stopWatch.stop();
         log.info("Retrieved market orders in {}ms", stopWatch.getTime());
     }
 
-    private void retrieveMarketOrders(Set<MarketOrder> marketOrders, Region region, String url, int page) {
+    private void retrieveMarketOrders(Region region, String url, int page) {
         try {
             HttpClientBuilder client = HttpClientBuilder.create();
             HttpGet request = new HttpGet(url);
@@ -101,7 +109,7 @@ public class MarketOrderService {
 
             // Retrieve next page
             if (json.has("next")) {
-                retrieveMarketOrders(marketOrders, region, json.get("next").getAsJsonObject().get("href").getAsString(), ++page);
+                retrieveMarketOrders(region, json.get("next").getAsJsonObject().get("href").getAsString(), ++page);
             }
         } catch (IOException e) {
             log.error("Error getting market orders from URL", e);
