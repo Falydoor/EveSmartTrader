@@ -12,8 +12,6 @@ import com.smarttrader.repository.InvMarketGroupRepository;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
-import com.smarttrader.repository.search.InvMarketGroupSearchRepository;
-import com.smarttrader.repository.search.InvTypeSearchRepository;
 import com.smarttrader.repository.search.SellableInvTypeSearchRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -56,13 +54,7 @@ public class SellableInvTypeService {
     private InvTypeRepository invTypeRepository;
 
     @Inject
-    private InvTypeSearchRepository invTypeSearchRepository;
-
-    @Inject
     private InvMarketGroupRepository invMarketGroupRepository;
-
-    @Inject
-    private InvMarketGroupSearchRepository invMarketGroupSearchRepository;
 
     @Inject
     private MarketOrderRepository marketOrderRepository;
@@ -94,9 +86,6 @@ public class SellableInvTypeService {
             }
             return false;
         }).collect(Collectors.toList());
-
-        invMarketGroupSearchRepository.save(invMarketGroupRepository.findAll());
-        invTypeSearchRepository.save(invTypeRepository.findAll());
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
