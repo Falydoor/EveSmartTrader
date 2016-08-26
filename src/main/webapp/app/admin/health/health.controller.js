@@ -5,9 +5,9 @@
         .module('eveSmartTraderApp')
         .controller('JhiHealthCheckController', JhiHealthCheckController);
 
-    JhiHealthCheckController.$inject = ['JhiHealthService', '$uibModal'];
+    JhiHealthCheckController.$inject = ['JhiHealthService', '$uibModal', '$http'];
 
-    function JhiHealthCheckController (JhiHealthService, $uibModal) {
+    function JhiHealthCheckController (JhiHealthService, $uibModal, $http) {
         var vm = this;
 
         vm.addHealthObject = addHealthObject;
@@ -23,9 +23,13 @@
         vm.showHealth = showHealth;
         vm.subSystemName = subSystemName;
         vm.transformHealthData = transformHealthData;
+        vm.refreshIndexes = refreshIndexes;
 
         vm.refresh();
 
+        function refreshIndexes(){
+            $http.post('/api/elasticsearch/index');
+        }
 
         function addHealthObject (result, isLeaf, healthObject, name) {
 
