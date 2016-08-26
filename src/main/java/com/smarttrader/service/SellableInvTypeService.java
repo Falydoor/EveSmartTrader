@@ -105,7 +105,7 @@ public class SellableInvTypeService {
         sellableInvTypeRepository.flush();
 
         sellableInvTypes = new ArrayList<>();
-        marketableInvTypes.parallelStream().forEach(invType -> getHistory(marketableInvTypes.size(), invType, 1));
+        marketableInvTypes.parallelStream().forEach(invType -> getHistory(invType, 1));
 
         log.info("Saving sellable inv type");
         sellableInvTypes = sellableInvTypeRepository.save(sellableInvTypes);
@@ -115,7 +115,7 @@ public class SellableInvTypeService {
         log.info("Retrieved sellable inv type in {}ms", stopWatch.getTime());
     }
 
-    private void getHistory(int invTypesSize, InvType invType, int tries) {
+    private void getHistory(InvType invType, int tries) {
         String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
         try {
             SellableInvType sellableInvType = new SellableInvType();
@@ -138,7 +138,7 @@ public class SellableInvTypeService {
                 sellableInvTypes.add(sellableInvType);
             }
             ++index;
-            double tempPercent = Math.floor(100 * index / invTypesSize);
+            double tempPercent = Math.floor(100 * index / marketableInvTypes.size());
             if (tempPercent != percent) {
                 percent = tempPercent;
                 log.info("Sellable progress : {}%", percent);
@@ -146,7 +146,7 @@ public class SellableInvTypeService {
         } catch (ConnectTimeoutException e) {
             log.info("Timeout on {} try {}", url, tries);
             if (tries < 6) {
-                getHistory(invTypesSize, invType, ++tries);
+                getHistory(invType, ++tries);
             }
         } catch (IOException e) {
             log.error("Error getting sellable inv types from URL", e);
