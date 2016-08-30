@@ -9,6 +9,5 @@ import java.util.List;
  * Spring Data JPA repository for the InvType entity.
  */
 public interface InvTypeRepository extends JpaRepository<InvType, Long> {
-
-    List<InvType> findByInvMarketGroupNotNull();
+    List<InvType> findByInvMarketGroupNotNullAndVolumeLessThanEqual(double i);
 }

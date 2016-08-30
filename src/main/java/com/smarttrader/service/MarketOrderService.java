@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -124,7 +125,7 @@ public class MarketOrderService {
         List<Station> stations = Arrays.stream(Station.values()).filter(sellStation -> sellStation != station).collect(Collectors.toList());
         Set<Long> userMarket = getInvTypeInUserMarket(station.getId(), 0);
 
-        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).stream()
+        return findSellableWIthoutSkill()
             .map(sellableInvType -> {
                 List<MarketOrder> sellOrders = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType());
                 Map<Long, List<MarketOrder>> sellOrdersByStation = sellOrders.stream().collect(Collectors.groupingBy(MarketOrder::getStationID));
@@ -137,7 +138,10 @@ public class MarketOrderService {
                         Double cheapestSellPrice = cheapestSell.get(0).getPrice();
                         Double cheapestBuyPrice = cheapestBuy.get(0).getPrice();
                         double thresholdPrice = Math.min(cheapestSellPrice * 1.1D, cheapestBuyPrice);
-                        List<MarketOrder> sellables = cheapestSell.stream().filter(marketOrder -> marketOrder.getPrice() < thresholdPrice).collect(Collectors.toList());
+                        List<MarketOrder> sellables = cheapestSell.stream()
+                            .filter(marketOrder -> marketOrder.getPrice() < thresholdPrice)
+                            .collect(Collectors.toList());
+
                         return new TradeDTO(sellableInvType.getInvType(), sellables, cheapestBuyPrice, cheapestSellPrice, userMarket, sellStation);
                     })
                     .collect(Collectors.toList());
@@ -149,7 +153,7 @@ public class MarketOrderService {
 
     public List<TradeDTO> buildPenuryTrades(Station station) {
         return sellableInvTypeRepository.findAll().stream()
-            .filter(sellableInvType -> marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(sellableInvType.getInvType(), station.getId()) == 0)
+            .filter(sellableInvType -> isPenury(station, sellableInvType))
             .map(sellableInvType -> new TradeDTO(sellableInvType.getInvType(), station))
             .collect(Collectors.toList());
     }
@@ -157,11 +161,19 @@ public class MarketOrderService {
     public List<TradeDTO> buildStationTrades(Station station) {
         Set<Long> userMarket = getInvTypeInUserMarket(station.getId(), 1);
 
-        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).stream()
+        return findSellableWIthoutSkill()
             .map(sellableInvType -> createStationTrade(sellableInvType.getInvType(), station.getId(), userMarket))
             .filter(this::isProfitable)
             .sorted((t1, t2) -> t2.getProfit().compareTo(t1.getProfit()))
             .collect(Collectors.toList());
+    }
+
+    private boolean isPenury(Station station, SellableInvType sellableInvType) {
+        return marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(sellableInvType.getInvType(), station.getId()) == 0;
+    }
+
+    private Stream<SellableInvType> findSellableWIthoutSkill() {
+        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).stream();
     }
 
     private TradeDTO createStationTrade(InvType invType, Long stationID, Set<Long> userMarket) {
@@ -195,7 +207,7 @@ public class MarketOrderService {
             ApiAuthorization auth = new ApiAuthorization(user.getKeyId(), user.getVCode());
             MarketOrdersResponse response = parser.getResponse(auth);
             return response.getAll().stream()
-                .filter(marketOrder -> stationID == marketOrder.getStationID() && marketOrder.getBid() == bid && marketOrder.getOrderState() == 0)
+                .filter(marketOrder -> isValidOrderFromStation(stationID, bid, marketOrder))
                 .mapToLong(com.beimin.eveapi.model.shared.MarketOrder::getTypeID)
                 .boxed()
                 .collect(Collectors.toSet());
@@ -203,6 +215,10 @@ public class MarketOrderService {
             log.error("Unable to retrieve user's market orders", e);
         }
         return new HashSet<>();
+    }
+
+    private boolean isValidOrderFromStation(long stationID, int bid, com.beimin.eveapi.model.shared.MarketOrder marketOrder) {
+        return stationID == marketOrder.getStationID() && marketOrder.getBid() == bid && marketOrder.getOrderState() == 0;
     }
 
     private boolean isSellableAndStationIsHub(JsonObject item) {

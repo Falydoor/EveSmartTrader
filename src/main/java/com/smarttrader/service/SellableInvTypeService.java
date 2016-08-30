@@ -14,6 +14,7 @@ import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
 import com.smarttrader.repository.search.SellableInvTypeSearchRepository;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -81,18 +82,10 @@ public class SellableInvTypeService {
 
     @PostConstruct
     private void init() {
-        marketableInvTypes = invTypeRepository.findByInvMarketGroupNotNull().parallelStream().filter(invType -> {
-            String result = invMarketGroupRepository.getMainParentMarketGroup(invType.getInvMarketGroup().getId());
-            String[] mainParentMarketGroupResult = StringUtils.split(result, '_');
-            if (mainParentMarketGroupResult != null && mainParentMarketGroupResult.length > 1) {
-                boolean isMarketable = Referential.SELLABLE_PARENT_GROUP.contains(Long.parseLong(mainParentMarketGroupResult[0])) && invType.getVolume() <= 1000;
-                if (isMarketable) {
-                    Referential.GROUP_PARENT_NAME_BY_TYPE_ID.put(invType.getId(), mainParentMarketGroupResult[1]);
-                    return true;
-                }
-            }
-            return false;
-        }).collect(Collectors.toList());
+        marketableInvTypes = invTypeRepository.findByInvMarketGroupNotNullAndVolumeLessThanEqual(1000)
+            .parallelStream()
+            .filter(this::isMarketable)
+            .collect(Collectors.toList());
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
@@ -182,6 +175,16 @@ public class SellableInvTypeService {
             return true;
         }
 
+        return false;
+    }
+
+    private boolean isMarketable(InvType invType) {
+        String mainParentMarketGroup = invMarketGroupRepository.getMainParentMarketGroup(invType.getInvMarketGroup().getId());
+        String[] results = StringUtils.split(mainParentMarketGroup, '_');
+        if (ArrayUtils.getLength(results) > 1 && Referential.SELLABLE_PARENT_GROUP.contains(Long.parseLong(results[0]))) {
+            Referential.GROUP_PARENT_NAME_BY_TYPE_ID.put(invType.getId(), results[1]);
+            return true;
+        }
         return false;
     }
 }
