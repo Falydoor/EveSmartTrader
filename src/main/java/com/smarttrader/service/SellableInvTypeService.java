@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -71,7 +72,7 @@ public class SellableInvTypeService {
 
     private CloseableHttpClient client = HttpClientBuilder.create().setMaxConnPerRoute(THREAD_NUMBER).build();
 
-    private int index;
+    private AtomicInteger doneNumber;
 
     private double percent;
 
@@ -98,7 +99,7 @@ public class SellableInvTypeService {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        index = 0;
+        doneNumber = new AtomicInteger();
         percent = -1;
 
         // Delete market orders
@@ -152,8 +153,7 @@ public class SellableInvTypeService {
                 sellableInvType.setInvType(invType);
                 sellableInvTypes.add(sellableInvType);
             }
-            ++index;
-            double tempPercent = Math.floor(100 * index / marketableInvTypes.size());
+            double tempPercent = Math.floor(100 * doneNumber.incrementAndGet() / marketableInvTypes.size());
             if (tempPercent != percent && tempPercent % 5 == 0) {
                 percent = tempPercent;
                 log.info("Sellable progress : {}%", percent);
