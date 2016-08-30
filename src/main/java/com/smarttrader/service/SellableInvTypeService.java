@@ -7,6 +7,7 @@ import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.Referential;
 import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.enums.Region;
+import com.smarttrader.domain.util.CrestBuilder;
 import com.smarttrader.domain.util.GsonBean;
 import com.smarttrader.repository.InvMarketGroupRepository;
 import com.smarttrader.repository.InvTypeRepository;
@@ -132,7 +133,7 @@ public class SellableInvTypeService {
     }
 
     private void getHistory(InvType invType, int tries) {
-        String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
+        String url = CrestBuilder.getHistory(Region.THE_FORGE.getId(), invType.getId());
         try {
             HttpGet request = new HttpGet(url);
             CloseableHttpResponse response = client.execute(request);

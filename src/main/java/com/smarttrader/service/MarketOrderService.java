@@ -7,9 +7,13 @@ import com.beimin.eveapi.response.shared.MarketOrdersResponse;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.smarttrader.domain.*;
+import com.smarttrader.domain.InvType;
+import com.smarttrader.domain.MarketOrder;
+import com.smarttrader.domain.SellableInvType;
+import com.smarttrader.domain.User;
 import com.smarttrader.domain.enums.Region;
 import com.smarttrader.domain.enums.Station;
+import com.smarttrader.domain.util.CrestBuilder;
 import com.smarttrader.domain.util.GsonBean;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.MarketOrderRepository;
@@ -81,7 +85,7 @@ public class MarketOrderService {
         marketOrders = new ArrayList<>();
         Arrays.stream(Region.values())
             .parallel()
-            .forEach(region -> retrieveMarketOrders(region, Referential.CREST_URL + "market/" + region.getId() + "/orders/all/", 1));
+            .forEach(region -> retrieveMarketOrders(region, CrestBuilder.getMarketOrders(region.getId()), 1));
         marketOrders = marketOrderRepository.save(marketOrders);
         marketOrderRepository.flush();
         marketOrderSearchRepository.save(marketOrders);
