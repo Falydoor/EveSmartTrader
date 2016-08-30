@@ -32,6 +32,9 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -43,6 +46,8 @@ import java.util.stream.StreamSupport;
 public class SellableInvTypeService {
 
     private final Logger log = LoggerFactory.getLogger(SellableInvTypeService.class);
+
+    private final int THREAD_NUMBER = 100;
 
     @Inject
     private SellableInvTypeRepository sellableInvTypeRepository;
@@ -64,7 +69,7 @@ public class SellableInvTypeService {
 
     private List<InvType> marketableInvTypes;
 
-    private CloseableHttpClient client = HttpClientBuilder.create().build();
+    private CloseableHttpClient client = HttpClientBuilder.create().setMaxConnPerRoute(THREAD_NUMBER).build();
 
     private int index;
 
@@ -105,7 +110,17 @@ public class SellableInvTypeService {
         sellableInvTypeRepository.flush();
 
         sellableInvTypes = new ArrayList<>();
-        marketableInvTypes.parallelStream().forEach(invType -> getHistory(invType, 1));
+        ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUMBER);
+        marketableInvTypes.forEach(invType -> executor.submit(() -> getHistory(invType, 0)));
+
+        executor.shutdown();
+
+        // Wait for a maximum of 5 minutes
+        try {
+            executor.awaitTermination(5, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            log.error("Retrieving sellable inv type took too much time", e);
+        }
 
         log.info("Saving sellable inv type");
         sellableInvTypes = sellableInvTypeRepository.save(sellableInvTypes);
@@ -118,8 +133,6 @@ public class SellableInvTypeService {
     private void getHistory(InvType invType, int tries) {
         String url = Referential.CREST_URL + "market/" + Region.THE_FORGE.getId() + "/history/?type=" + Referential.CREST_URL + "inventory/types/" + invType.getId() + "/";
         try {
-            SellableInvType sellableInvType = new SellableInvType();
-            sellableInvType.setInvType(invType);
             HttpGet request = new HttpGet(url);
             CloseableHttpResponse response = client.execute(request);
 
@@ -135,11 +148,13 @@ public class SellableInvTypeService {
                 .count() > 14;
 
             if (isSellable) {
+                SellableInvType sellableInvType = new SellableInvType();
+                sellableInvType.setInvType(invType);
                 sellableInvTypes.add(sellableInvType);
             }
             ++index;
             double tempPercent = Math.floor(100 * index / marketableInvTypes.size());
-            if (tempPercent != percent) {
+            if (tempPercent != percent && tempPercent % 5 == 0) {
                 percent = tempPercent;
                 log.info("Sellable progress : {}%", percent);
             }
@@ -149,7 +164,7 @@ public class SellableInvTypeService {
                 getHistory(invType, ++tries);
             }
         } catch (IOException e) {
-            log.error("Error getting sellable inv types from URL", e);
+            log.error("Error getting sellable inv types from URL : " + url, e);
         }
     }
 
