@@ -1,11 +1,6 @@
 package com.smarttrader.config.liquibase;
 
 import com.smarttrader.config.Constants;
-import com.smarttrader.domain.InvMarketGroup;
-import com.smarttrader.domain.InvType;
-import com.smarttrader.domain.Referential;
-import com.smarttrader.repository.InvMarketGroupRepository;
-import com.smarttrader.repository.InvTypeRepository;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import org.slf4j.Logger;
@@ -16,7 +11,6 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.StopWatch;
 
 import javax.inject.Inject;
-import java.util.stream.Collectors;
 
 /**
  * Specific liquibase.integration.spring.SpringLiquibase that will update the database asynchronously.
