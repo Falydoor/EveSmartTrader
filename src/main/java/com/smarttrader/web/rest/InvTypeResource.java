@@ -21,10 +21,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * REST controller for managing InvType.
@@ -34,13 +32,13 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class InvTypeResource {
 
     private final Logger log = LoggerFactory.getLogger(InvTypeResource.class);
-        
+
     @Inject
     private InvTypeRepository invTypeRepository;
-    
+
     @Inject
     private InvTypeSearchRepository invTypeSearchRepository;
-    
+
     /**
      * POST  /inv-types : Create a new invType.
      *
@@ -103,7 +101,7 @@ public class InvTypeResource {
     public ResponseEntity<List<InvType>> getAllInvTypes(Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to get a page of InvTypes");
-        Page<InvType> page = invTypeRepository.findAll(pageable); 
+        Page<InvType> page = invTypeRepository.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/inv-types");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }

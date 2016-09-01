@@ -1,8 +1,8 @@
 package com.smarttrader.web.rest.dto;
 
-import java.time.ZonedDateTime;
-
 import com.smarttrader.domain.User;
+
+import java.time.ZonedDateTime;
 
 /**
  * A DTO extending the UserDTO, which is meant to be used in the user management UI.

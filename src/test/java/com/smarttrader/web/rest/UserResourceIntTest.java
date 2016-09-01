@@ -1,7 +1,6 @@
 package com.smarttrader.web.rest;
 
 import com.smarttrader.EveSmartTraderApp;
-import com.smarttrader.domain.User;
 import com.smarttrader.repository.UserRepository;
 import com.smarttrader.service.UserService;
 import org.junit.Before;
@@ -18,8 +17,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import javax.inject.Inject;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 

@@ -1,7 +1,6 @@
 package com.smarttrader.service;
 
 import com.smarttrader.domain.Authority;
-import com.smarttrader.domain.PersistentToken;
 import com.smarttrader.domain.User;
 import com.smarttrader.repository.AuthorityRepository;
 import com.smarttrader.repository.PersistentTokenRepository;
@@ -10,9 +9,6 @@ import com.smarttrader.repository.search.UserSearchRepository;
 import com.smarttrader.security.SecurityUtils;
 import com.smarttrader.service.util.RandomUtil;
 import com.smarttrader.web.rest.dto.ManagedUserDTO;
-import java.time.ZonedDateTime;
-import java.time.LocalDate;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
 import javax.inject.Inject;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Service class for managing users.

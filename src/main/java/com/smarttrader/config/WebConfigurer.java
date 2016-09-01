@@ -18,10 +18,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-import java.io.File;
-import java.util.*;
 import javax.inject.Inject;
 import javax.servlet.*;
+import java.io.File;
+import java.util.Arrays;
+import java.util.EnumSet;
 
 /**
  * Configuration of web application with Servlet 3.0 APIs.

@@ -1,7 +1,6 @@
 package com.smarttrader.security;
 
 import com.smarttrader.config.Constants;
-
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
 

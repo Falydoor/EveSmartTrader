@@ -2,11 +2,6 @@ package com.smarttrader;
 
 import com.smarttrader.config.Constants;
 import com.smarttrader.config.JHipsterProperties;
-import com.smarttrader.domain.InvMarketGroup;
-import com.smarttrader.domain.InvType;
-import com.smarttrader.domain.Referential;
-import com.smarttrader.repository.InvMarketGroupRepository;
-import com.smarttrader.repository.InvTypeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -25,7 +20,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @ComponentScan
 @EnableAutoConfiguration(exclude = {MetricFilterAutoConfiguration.class, MetricRepositoryAutoConfiguration.class})

@@ -2,11 +2,12 @@ package com.smarttrader.web.rest.dto;
 
 import com.smarttrader.domain.Authority;
 import com.smarttrader.domain.User;
-
 import com.smarttrader.domain.enums.Station;
 import org.hibernate.validator.constraints.Email;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.Set;
 import java.util.stream.Collectors;
 /**

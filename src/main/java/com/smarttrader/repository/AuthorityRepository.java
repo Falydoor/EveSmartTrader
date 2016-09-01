@@ -1,7 +1,6 @@
 package com.smarttrader.repository;
 
 import com.smarttrader.domain.Authority;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

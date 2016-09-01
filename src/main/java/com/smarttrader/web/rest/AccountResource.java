@@ -1,7 +1,8 @@
 package com.smarttrader.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.smarttrader.domain.*;
+import com.smarttrader.domain.PersistentToken;
+import com.smarttrader.domain.User;
 import com.smarttrader.repository.InvMarketGroupRepository;
 import com.smarttrader.repository.InvTypeRepository;
 import com.smarttrader.repository.PersistentTokenRepository;
@@ -28,7 +29,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * REST controller for managing the current user's account.

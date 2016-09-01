@@ -1,14 +1,14 @@
 package com.smarttrader.config.elasticsearch;
 
-import static java.lang.System.currentTimeMillis;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import static java.lang.System.currentTimeMillis;
 
 @Component
 public class IndexReinitializer {

@@ -21,10 +21,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * REST controller for managing InvMarketGroup.
@@ -34,13 +32,13 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class InvMarketGroupResource {
 
     private final Logger log = LoggerFactory.getLogger(InvMarketGroupResource.class);
-        
+
     @Inject
     private InvMarketGroupRepository invMarketGroupRepository;
-    
+
     @Inject
     private InvMarketGroupSearchRepository invMarketGroupSearchRepository;
-    
+
     /**
      * POST  /inv-market-groups : Create a new invMarketGroup.
      *
@@ -103,7 +101,7 @@ public class InvMarketGroupResource {
     public ResponseEntity<List<InvMarketGroup>> getAllInvMarketGroups(Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to get a page of InvMarketGroups");
-        Page<InvMarketGroup> page = invMarketGroupRepository.findAll(pageable); 
+        Page<InvMarketGroup> page = invMarketGroupRepository.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/inv-market-groups");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }

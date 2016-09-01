@@ -2,7 +2,6 @@ package com.smarttrader.repository;
 
 import com.smarttrader.config.audit.AuditEventConverter;
 import com.smarttrader.domain.PersistentAuditEvent;
-
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.stereotype.Repository;
