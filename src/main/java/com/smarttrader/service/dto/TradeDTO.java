@@ -7,6 +7,7 @@ import com.smarttrader.domain.enums.Station;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by Theo on 6/10/16.
@@ -42,24 +43,29 @@ public class TradeDTO {
         totalVolume = invType.getVolume().longValue();
     }
 
-    public TradeDTO(InvType invType, MarketOrder cheapest, MarketOrder costliest, Set<Long> userMarket) {
-        setCommonFields(invType);
+    public TradeDTO(MarketOrder cheapest, MarketOrder costliest, Set<Long> userMarket) {
+        setCommonFields(cheapest.getInvType());
         profit = Double.valueOf(cheapest.getPrice() - costliest.getPrice()).longValue();
         sellPrice = costliest.getPrice().longValue();
         percentProfit = 100 * profit / sellPrice;
         inMarket = userMarket.contains(typeId);
     }
 
-    public TradeDTO(InvType invType, List<MarketOrder> sellables, Double cheapestBuyPrice, Double cheapestSellPrice, Set<Long> userMarket, Station station) {
-        setCommonFields(invType);
+    public TradeDTO(List<MarketOrder> cheapestSell, Set<Long> userMarket, Double cheapestBuy) {
+        Double cheapestSellPrice = cheapestSell.get(0).getPrice();
+        double thresholdPrice = Math.min(cheapestSellPrice * 1.1D, cheapestBuy);
+        List<MarketOrder> sellables = cheapestSell.stream()
+            .filter(marketOrder -> marketOrder.getPrice() < thresholdPrice)
+            .collect(Collectors.toList());
+        setCommonFields(cheapestSell.get(0).getInvType());
         totalPrice = Double.valueOf(sellables.stream().mapToDouble(value -> value.getPrice() * value.getVolume()).sum()).longValue();
-        totalProfit = Double.valueOf(sellables.stream().mapToDouble(value -> (cheapestBuyPrice - value.getPrice()) * value.getVolume()).sum()).longValue();
+        totalProfit = Double.valueOf(sellables.stream().mapToDouble(value -> (cheapestBuy - value.getPrice()) * value.getVolume()).sum()).longValue();
         totalQuantity = sellables.stream().mapToLong(MarketOrder::getVolume).sum();
-        totalVolume = Double.valueOf(totalQuantity * invType.getVolume()).longValue();
-        sellPrice = cheapestBuyPrice.longValue();
+        totalVolume = Double.valueOf(totalQuantity * cheapestSell.get(0).getInvType().getVolume()).longValue();
+        sellPrice = cheapestBuy.longValue();
         percentProfit = 100 * totalProfit / totalPrice;
-        profit = Double.valueOf(cheapestBuyPrice - cheapestSellPrice).longValue();
-        this.station = station.toString();
+        profit = Double.valueOf(cheapestBuy - cheapestSellPrice).longValue();
+        this.station = Station.fromLong(cheapestSell.get(0).getStationID()).toString();
         inMarket = userMarket.contains(typeId);
     }
 

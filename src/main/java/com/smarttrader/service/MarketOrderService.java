@@ -138,30 +138,9 @@ public class MarketOrderService {
     }
 
     public List<TradeDTO> buildHubTrades(Station station) {
-        List<Station> stations = Arrays.stream(Station.values()).filter(sellStation -> sellStation != station).collect(Collectors.toList());
-        Set<Long> userMarket = getInvTypeInUserMarket(station.getId(), 0);
-
         return findSellableWithoutSkill()
-            .map(sellableInvType -> {
-                List<MarketOrder> sellOrders = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType());
-                Map<Long, List<MarketOrder>> sellOrdersByStation = sellOrders.stream().collect(Collectors.groupingBy(MarketOrder::getStationID));
-                List<MarketOrder> cheapestBuy = sellOrdersByStation.get(station.getId());
-
-                return stations.stream()
-                    .filter(sellStation -> isCheapestThanBuyStation(sellOrdersByStation.get(sellStation.getId()), cheapestBuy))
-                    .map(sellStation -> {
-                        List<MarketOrder> cheapestSell = sellOrdersByStation.get(sellStation.getId());
-                        Double cheapestSellPrice = cheapestSell.get(0).getPrice();
-                        Double cheapestBuyPrice = cheapestBuy.get(0).getPrice();
-                        double thresholdPrice = Math.min(cheapestSellPrice * 1.1D, cheapestBuyPrice);
-                        List<MarketOrder> sellables = cheapestSell.stream()
-                            .filter(marketOrder -> marketOrder.getPrice() < thresholdPrice)
-                            .collect(Collectors.toList());
-
-                        return new TradeDTO(sellableInvType.getInvType(), sellables, cheapestBuyPrice, cheapestSellPrice, userMarket, sellStation);
-                    })
-                    .collect(Collectors.toList());
-            })
+            .filter(sellableInvType -> marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(sellableInvType.getInvType(), station.getId()) > 0)
+            .map(sellableInvType -> getTradesForAllStations(station, sellableInvType))
             .flatMap(Collection::stream)
             .sorted((t1, t2) -> t2.getPercentProfit().compareTo(t1.getPercentProfit()))
             .collect(Collectors.toList());
@@ -184,6 +163,19 @@ public class MarketOrderService {
             .collect(Collectors.toList());
     }
 
+    private List<TradeDTO> getTradesForAllStations(Station station, SellableInvType sellableInvType) {
+        Set<Long> userMarket = getInvTypeInUserMarket(station.getId(), 0);
+        Map<Long, List<MarketOrder>> sellOrdersByStation = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType())
+            .stream()
+            .collect(Collectors.groupingBy(MarketOrder::getStationID));
+        Double cheapestBuy = sellOrdersByStation.get(station.getId()).get(0).getPrice();
+
+        return Arrays.stream(Station.values())
+            .filter(sellStation -> sellStation != station && isCheapestThanBuyStation(sellOrdersByStation.get(sellStation.getId()), cheapestBuy))
+            .map(sellStation -> new TradeDTO(sellOrdersByStation.get(sellStation.getId()), userMarket, cheapestBuy))
+            .collect(Collectors.toList());
+    }
+
     private boolean isPenury(Station station, SellableInvType sellableInvType) {
         return marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(sellableInvType.getInvType(), station.getId()) == 0;
     }
@@ -196,7 +188,7 @@ public class MarketOrderService {
         Optional<MarketOrder> cheapestSell = findCheapestSellOrder(invType, stationID);
         Optional<MarketOrder> costliestBuy = findCostliestBuyOrder(invType, stationID);
         if (cheapestSell.isPresent() && costliestBuy.isPresent()) {
-            return new TradeDTO(invType, cheapestSell.get(), costliestBuy.get(), userMarket);
+            return new TradeDTO(cheapestSell.get(), costliestBuy.get(), userMarket);
         }
         return null;
     }
@@ -249,7 +241,7 @@ public class MarketOrderService {
         return marketOrder;
     }
 
-    private boolean isCheapestThanBuyStation(List<MarketOrder> cheapestSell, List<MarketOrder> cheapestBuy) {
-        return !CollectionUtils.isEmpty(cheapestBuy) && !CollectionUtils.isEmpty(cheapestSell) && cheapestSell.get(0).getPrice() < cheapestBuy.get(0).getPrice();
+    private boolean isCheapestThanBuyStation(List<MarketOrder> cheapestSell, Double cheapestBuy) {
+        return !CollectionUtils.isEmpty(cheapestSell) && cheapestSell.get(0).getPrice() < cheapestBuy;
     }
 }
