@@ -154,10 +154,8 @@ public class MarketOrderService {
     }
 
     public List<TradeDTO> buildStationTrades(Station station) {
-        Set<Long> userMarket = getInvTypeInUserMarket(station.getId(), 1);
-
         return findSellableWithoutSkill()
-            .map(sellableInvType -> createStationTrade(sellableInvType.getInvType(), station.getId(), userMarket))
+            .map(sellableInvType -> createStationTrade(sellableInvType.getInvType(), station.getId()))
             .filter(this::isProfitable)
             .sorted((t1, t2) -> t2.getProfit().compareTo(t1.getProfit()))
             .collect(Collectors.toList());
@@ -166,7 +164,6 @@ public class MarketOrderService {
     private List<TradeDTO> getTradesForAllStations(Station station, SellableInvType sellableInvType) {
         Set<Long> userMarket = getInvTypeInUserMarket(station.getId(), 0);
         Map<Long, List<MarketOrder>> sellOrdersByStation = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType())
-            .stream()
             .collect(Collectors.groupingBy(MarketOrder::getStationID));
         Double cheapestBuy = sellOrdersByStation.get(station.getId()).get(0).getPrice();
 
@@ -181,10 +178,11 @@ public class MarketOrderService {
     }
 
     private Stream<SellableInvType> findSellableWithoutSkill() {
-        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(SellableInvMarketGroup.SKILLS.getId()).stream();
+        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(SellableInvMarketGroup.SKILLS.getId());
     }
 
-    private TradeDTO createStationTrade(InvType invType, Long stationID, Set<Long> userMarket) {
+    private TradeDTO createStationTrade(InvType invType, Long stationID) {
+        Set<Long> userMarket = getInvTypeInUserMarket(stationID, 1);
         Optional<MarketOrder> cheapestSell = findCheapestSellOrder(invType, stationID);
         Optional<MarketOrder> costliestBuy = findCostliestBuyOrder(invType, stationID);
         if (cheapestSell.isPresent() && costliestBuy.isPresent()) {
