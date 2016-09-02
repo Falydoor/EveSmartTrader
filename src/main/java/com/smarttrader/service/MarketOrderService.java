@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -37,6 +38,9 @@ import org.springframework.util.CollectionUtils;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -72,6 +76,8 @@ public class MarketOrderService {
 
     private List<MarketOrder> marketOrders;
 
+    private CloseableHttpClient client = HttpClientBuilder.create().setMaxConnPerRoute(Region.values().length).build();
+
     @Scheduled(cron = "0 0/30 * * * ?")
     public void retrieveMarketOrders() {
         StopWatch stopWatch = new StopWatch();
@@ -85,9 +91,19 @@ public class MarketOrderService {
             .collect(Collectors.toMap(sellableInvType -> sellableInvType.getInvType().getId(), sellableInvType -> sellableInvType));
 
         marketOrders = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(Region.values().length);
         Arrays.stream(Region.values())
-            .parallel()
-            .forEach(region -> retrieveMarketOrders(region, CrestBuilder.getMarketOrders(region.getId()), 1));
+            .forEach(region -> executor.submit(() -> retrieveMarketOrders(region, CrestBuilder.getMarketOrders(region.getId()), 1)));
+
+        executor.shutdown();
+
+        // Wait for a maximum of 5 minutes
+        try {
+            executor.awaitTermination(5, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            log.error("Retrieving market orders took too much time", e);
+        }
+
         marketOrders = marketOrderRepository.save(marketOrders);
         marketOrderRepository.flush();
         marketOrderSearchRepository.save(marketOrders);
@@ -97,9 +113,8 @@ public class MarketOrderService {
 
     private void retrieveMarketOrders(Region region, String url, int page) {
         try {
-            HttpClientBuilder client = HttpClientBuilder.create();
             HttpGet request = new HttpGet(url);
-            CloseableHttpResponse response = client.build().execute(request);
+            CloseableHttpResponse response = client.execute(request);
 
             // Parse json
             JsonObject json = gsonBean.parse(EntityUtils.toString(response.getEntity()));
