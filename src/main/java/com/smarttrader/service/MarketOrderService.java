@@ -141,7 +141,7 @@ public class MarketOrderService {
         List<Station> stations = Arrays.stream(Station.values()).filter(sellStation -> sellStation != station).collect(Collectors.toList());
         Set<Long> userMarket = getInvTypeInUserMarket(station.getId(), 0);
 
-        return findSellableWIthoutSkill()
+        return findSellableWithoutSkill()
             .map(sellableInvType -> {
                 List<MarketOrder> sellOrders = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType());
                 Map<Long, List<MarketOrder>> sellOrdersByStation = sellOrders.stream().collect(Collectors.groupingBy(MarketOrder::getStationID));
@@ -177,7 +177,7 @@ public class MarketOrderService {
     public List<TradeDTO> buildStationTrades(Station station) {
         Set<Long> userMarket = getInvTypeInUserMarket(station.getId(), 1);
 
-        return findSellableWIthoutSkill()
+        return findSellableWithoutSkill()
             .map(sellableInvType -> createStationTrade(sellableInvType.getInvType(), station.getId(), userMarket))
             .filter(this::isProfitable)
             .sorted((t1, t2) -> t2.getProfit().compareTo(t1.getProfit()))
@@ -188,7 +188,7 @@ public class MarketOrderService {
         return marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(sellableInvType.getInvType(), station.getId()) == 0;
     }
 
-    private Stream<SellableInvType> findSellableWIthoutSkill() {
+    private Stream<SellableInvType> findSellableWithoutSkill() {
         return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(SellableInvMarketGroup.SKILLS.getId()).stream();
     }
 
