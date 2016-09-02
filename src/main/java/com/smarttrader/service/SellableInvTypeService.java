@@ -7,6 +7,7 @@ import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.Referential;
 import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.enums.Region;
+import com.smarttrader.domain.enums.SellableInvMarketGroup;
 import com.smarttrader.domain.util.CrestBuilder;
 import com.smarttrader.domain.util.GsonBean;
 import com.smarttrader.repository.InvMarketGroupRepository;
@@ -181,7 +182,7 @@ public class SellableInvTypeService {
     private boolean isMarketable(InvType invType) {
         String mainParentMarketGroup = invMarketGroupRepository.getMainParentMarketGroup(invType.getInvMarketGroup().getId());
         String[] results = StringUtils.split(mainParentMarketGroup, '_');
-        if (ArrayUtils.getLength(results) > 1 && Referential.SELLABLE_PARENT_GROUP.contains(Long.parseLong(results[0]))) {
+        if (ArrayUtils.getLength(results) > 1 && SellableInvMarketGroup.getIds().contains(Long.parseLong(results[0]))) {
             Referential.GROUP_PARENT_NAME_BY_TYPE_ID.put(invType.getId(), results[1]);
             return true;
         }

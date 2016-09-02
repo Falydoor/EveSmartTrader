@@ -12,6 +12,7 @@ import com.smarttrader.domain.MarketOrder;
 import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.User;
 import com.smarttrader.domain.enums.Region;
+import com.smarttrader.domain.enums.SellableInvMarketGroup;
 import com.smarttrader.domain.enums.Station;
 import com.smarttrader.domain.util.CrestBuilder;
 import com.smarttrader.domain.util.GsonBean;
@@ -173,7 +174,7 @@ public class MarketOrderService {
     }
 
     private Stream<SellableInvType> findSellableWIthoutSkill() {
-        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(150L).stream();
+        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(SellableInvMarketGroup.SKILLS.getId()).stream();
     }
 
     private TradeDTO createStationTrade(InvType invType, Long stationID, Set<Long> userMarket) {
