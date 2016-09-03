@@ -1,5 +1,6 @@
 package com.smarttrader.security;
 
+import com.smarttrader.domain.enums.Station;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -57,7 +58,7 @@ public final class SecurityUtils {
 
     /**
      * If the current user has a specific authority (security role).
-     *
+     * <p>
      * <p>The name of this method comes from the isUserInRole() method in the Servlet API</p>
      *
      * @param authority the authorithy to check
@@ -73,5 +74,22 @@ public final class SecurityUtils {
             }
         }
         return false;
+    }
+
+    public static Station getCurrentUserStation() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+            return ((CustomUserDetails) authentication.getPrincipal()).getStation();
+        }
+        return Station.JitaHUB;
+    }
+
+    public static void setCurrentUserStation(Station station) {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+            ((CustomUserDetails) authentication.getPrincipal()).setStation(station);
+        }
     }
 }

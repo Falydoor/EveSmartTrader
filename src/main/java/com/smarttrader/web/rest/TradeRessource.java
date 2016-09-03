@@ -2,10 +2,9 @@ package com.smarttrader.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.smarttrader.domain.enums.Station;
+import com.smarttrader.security.SecurityUtils;
 import com.smarttrader.service.MarketOrderService;
 import org.json.JSONArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +23,17 @@ import java.net.URISyntaxException;
 @RequestMapping("/api")
 public class TradeRessource {
 
-    private final Logger log = LoggerFactory.getLogger(UserResource.class);
-
     @Inject
     private MarketOrderService marketOrderService;
+
+    @RequestMapping(value = "/changeStation",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    @Transactional(readOnly = true)
+    public void changeStation(Station station) {
+        SecurityUtils.setCurrentUserStation(station);
+    }
 
     @RequestMapping(value = "/hubTrades",
         method = RequestMethod.GET,

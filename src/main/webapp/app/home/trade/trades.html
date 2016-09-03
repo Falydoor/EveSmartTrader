@@ -5,7 +5,7 @@
     <h4>
         Station
         <select ng-options="station for station in vm.stations track by station" ng-model="vm.station"
-                ng-change="vm.loadTrades()">
+                ng-change="vm.changeStation()">
         </select>
     </h4>
     <h2 ng-click="vm.showPenuryTrades = !vm.showPenuryTrades" class="pointer">{{vm.penuryTrades !== undefined ?
