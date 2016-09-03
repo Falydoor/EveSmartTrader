@@ -3,7 +3,9 @@ package com.smarttrader.service.dto;
 import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.MarketOrder;
 import com.smarttrader.domain.Referential;
+import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.enums.Station;
+import com.smarttrader.security.SecurityUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -31,16 +33,16 @@ public class TradeDTO {
 
     private String groupName;
 
-    private String station;
+    private Station station;
 
     private Long typeId;
 
     private Boolean inMarket;
 
-    public TradeDTO(InvType invType, Station station) {
-        setCommonFields(invType);
-        this.station = station.toString();
-        totalVolume = invType.getVolume().longValue();
+    public TradeDTO(SellableInvType sellableInvType) {
+        setCommonFields(sellableInvType.getInvType());
+        this.station = SecurityUtils.getCurrentUserStation();
+        totalVolume = sellableInvType.getInvType().getVolume().longValue();
     }
 
     public TradeDTO(MarketOrder cheapest, MarketOrder costliest, Set<Long> userMarket) {
@@ -65,7 +67,7 @@ public class TradeDTO {
         sellPrice = cheapestBuy.longValue();
         percentProfit = 100 * totalProfit / totalPrice;
         profit = Double.valueOf(cheapestBuy - cheapestSellPrice).longValue();
-        this.station = Station.fromLong(cheapestSell.get(0).getStationID()).toString();
+        this.station = Station.fromLong(cheapestSell.get(0).getStationID()).orElse(Station.JitaHUB);
         inMarket = userMarket.contains(typeId);
     }
 
@@ -77,11 +79,11 @@ public class TradeDTO {
         this.typeId = typeId;
     }
 
-    public String getStation() {
+    public Station getStation() {
         return station;
     }
 
-    public void setStation(String station) {
+    public void setStation(Station station) {
         this.station = station;
     }
 
