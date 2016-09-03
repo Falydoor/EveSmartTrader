@@ -4,7 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.smarttrader.domain.enums.Station;
 import com.smarttrader.security.SecurityUtils;
 import com.smarttrader.service.MarketOrderService;
-import org.json.JSONArray;
+import com.smarttrader.service.dto.TradeDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Inject;
 import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * Created by Theo on 6/9/16.
@@ -40,9 +41,9 @@ public class TradeRessource {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Transactional(readOnly = true)
-    public ResponseEntity<JSONArray> getHubTrades()
+    public ResponseEntity<List<TradeDTO>> getHubTrades()
         throws URISyntaxException {
-        return new ResponseEntity<>(new JSONArray(marketOrderService.buildHubTrades()), HttpStatus.OK);
+        return new ResponseEntity<>(marketOrderService.buildHubTrades(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/penuryTrades",
@@ -50,9 +51,9 @@ public class TradeRessource {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Transactional(readOnly = true)
-    public ResponseEntity<JSONArray> getPenuryTrades()
+    public ResponseEntity<List<TradeDTO>> getPenuryTrades()
         throws URISyntaxException {
-        return new ResponseEntity<>(new JSONArray(marketOrderService.buildPenuryTrades()), HttpStatus.OK);
+        return new ResponseEntity<>(marketOrderService.buildPenuryTrades(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/stationTrades",
@@ -60,9 +61,9 @@ public class TradeRessource {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Transactional(readOnly = true)
-    public ResponseEntity<JSONArray> getStationTrades()
+    public ResponseEntity<List<TradeDTO>> getStationTrades()
         throws URISyntaxException {
-        return new ResponseEntity<>(new JSONArray(marketOrderService.buildStationTrades()), HttpStatus.OK);
+        return new ResponseEntity<>(marketOrderService.buildStationTrades(), HttpStatus.OK);
     }
 
 }
