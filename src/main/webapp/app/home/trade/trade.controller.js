@@ -15,11 +15,12 @@
         vm.showHubTrades = true;
         vm.showPenuryTrades = false;
         vm.showStationTrades = false;
+        vm.marketOrders = {};
         vm.changeStation = changeStation;
         vm.loadTrades = loadTrades;
         vm.copy = copy;
 
-        vm.loadTrades();
+        vm.changeStation();
 
         function copy(trade) {
             trade.copied = true;
@@ -43,7 +44,8 @@
         }
 
         function changeStation() {
-            Trade.changeStation({station: vm.station}, function () {
+            Trade.changeStation({station: vm.station}, function (marketOrders) {
+                vm.marketOrders = marketOrders;
                 vm.loadTrades();
             });
         }

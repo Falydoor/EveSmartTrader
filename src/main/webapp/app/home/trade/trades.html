@@ -64,7 +64,8 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="trade in vm.stationTrades" class="{{trade.copied ? 'success' : trade.inMarket ? 'danger' : ''}}">
+        <tr ng-repeat="trade in vm.stationTrades"
+            class="{{trade.copied ? 'success' : vm.marketOrders.buyOrders.indexOf(trade.typeId) > -1 ? 'danger' : ''}}">
             <td><span class="label label-info">{{trade.profit | number}} ISK</span></td>
             <td><span class="label label-primary">{{trade.sellPrice | number}} ISK</span></td>
             <td><span class="label label-success">{{trade.percentProfit}} %</span></td>
@@ -110,7 +111,7 @@
         </thead>
         <tbody>
         <tr ng-show="trade.station === vm.sellerStation" ng-repeat="trade in vm.hubTrades"
-            class="{{trade.copied ? 'success' : trade.inMarket ? 'danger' : ''}}">
+            class="{{trade.copied ? 'success' : vm.marketOrders.sellOrders.indexOf(trade.typeId) > -1 ? 'danger' : ''}}">
             <td><span class="label label-info">{{trade.profit | number}} ISK</span></td>
             <td><span class="label label-primary">{{trade.totalProfit | number}} ISK</span></td>
             <td><span class="label label-success">{{trade.totalPrice | number}} ISK</span></td>

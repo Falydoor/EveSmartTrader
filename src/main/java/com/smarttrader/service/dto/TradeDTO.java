@@ -8,7 +8,6 @@ import com.smarttrader.domain.enums.Station;
 import com.smarttrader.security.SecurityUtils;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -37,23 +36,20 @@ public class TradeDTO {
 
     private Long typeId;
 
-    private Boolean inMarket;
-
     public TradeDTO(SellableInvType sellableInvType) {
         setCommonFields(sellableInvType.getInvType());
         this.station = SecurityUtils.getCurrentUserStation();
         totalVolume = sellableInvType.getInvType().getVolume().longValue();
     }
 
-    public TradeDTO(MarketOrder cheapest, MarketOrder costliest, Set<Long> userMarket) {
+    public TradeDTO(MarketOrder cheapest, MarketOrder costliest) {
         setCommonFields(cheapest.getInvType());
         profit = Double.valueOf(cheapest.getPrice() - costliest.getPrice()).longValue();
         sellPrice = costliest.getPrice().longValue();
         percentProfit = 100 * profit / sellPrice;
-        inMarket = userMarket.contains(typeId);
     }
 
-    public TradeDTO(List<MarketOrder> cheapestSell, Set<Long> userMarket, Double cheapestBuy) {
+    public TradeDTO(List<MarketOrder> cheapestSell, Double cheapestBuy) {
         Double cheapestSellPrice = cheapestSell.get(0).getPrice();
         double thresholdPrice = Math.min(cheapestSellPrice * 1.1D, cheapestBuy);
         List<MarketOrder> sellables = cheapestSell.stream()
@@ -68,7 +64,6 @@ public class TradeDTO {
         percentProfit = 100 * totalProfit / totalPrice;
         profit = Double.valueOf(cheapestBuy - cheapestSellPrice).longValue();
         this.station = Station.fromLong(cheapestSell.get(0).getStationID()).orElse(Station.JitaHUB);
-        inMarket = userMarket.contains(typeId);
     }
 
     public Long getTypeId() {
@@ -157,14 +152,6 @@ public class TradeDTO {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
-    }
-
-    public Boolean getInMarket() {
-        return inMarket;
-    }
-
-    public void setInMarket(Boolean inMarket) {
-        this.inMarket = inMarket;
     }
 
     @Override

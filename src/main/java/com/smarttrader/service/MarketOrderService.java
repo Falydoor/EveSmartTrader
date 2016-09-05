@@ -22,6 +22,7 @@ import com.smarttrader.repository.SellableInvTypeRepository;
 import com.smarttrader.repository.search.MarketOrderSearchRepository;
 import com.smarttrader.security.SecurityUtils;
 import com.smarttrader.service.dto.TradeDTO;
+import com.smarttrader.web.rest.dto.UserMarketDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -162,15 +163,33 @@ public class MarketOrderService {
             .collect(Collectors.toList());
     }
 
+    public UserMarketDTO getInvTypeInUserMarket() {
+        User user = userService.getUserWithAuthorities();
+        if (user.getKeyId() == null || StringUtils.isBlank(user.getVCode())) {
+            return new UserMarketDTO();
+        }
+        try {
+            MarketOrdersParser parser = new MarketOrdersParser();
+            ApiAuthorization auth = new ApiAuthorization(user.getKeyId(), user.getVCode());
+            MarketOrdersResponse response = parser.getResponse(auth);
+            Map<Integer, Set<Integer>> typeIDByBid = response.getAll().stream()
+                .filter(this::isValidMarketOrderFromStation)
+                .collect(Collectors.groupingBy(com.beimin.eveapi.model.shared.MarketOrder::getBid, Collectors.mapping(com.beimin.eveapi.model.shared.MarketOrder::getTypeID, Collectors.toSet())));
+            return new UserMarketDTO(typeIDByBid);
+        } catch (ApiException e) {
+            log.error("Unable to retrieve user's market orders", e);
+        }
+        return new UserMarketDTO();
+    }
+
     private List<TradeDTO> getTradesForAllStations(SellableInvType sellableInvType) {
-        Set<Long> userMarket = getSellInvTypeInUserMarket();
         Map<Station, List<MarketOrder>> sellOrdersByStation = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType())
             .collect(Collectors.groupingBy(marketOrder -> Station.fromLong(marketOrder.getStationID()).get()));
         Double cheapestBuy = sellOrdersByStation.get(SecurityUtils.getCurrentUserStation()).get(0).getPrice();
 
         return Arrays.stream(Station.values())
             .filter(sellStation -> isCheapestThanBuyStation(sellOrdersByStation.get(sellStation), cheapestBuy))
-            .map(sellStation -> new TradeDTO(sellOrdersByStation.get(sellStation), userMarket, cheapestBuy))
+            .map(sellStation -> new TradeDTO(sellOrdersByStation.get(sellStation), cheapestBuy))
             .collect(Collectors.toList());
     }
 
@@ -187,11 +206,10 @@ public class MarketOrderService {
     }
 
     private TradeDTO createStationTrade(SellableInvType sellableInvType) {
-        Set<Long> userMarket = getBuyInvTypeInUserMarket();
         Optional<MarketOrder> cheapestSell = findCheapestSellOrder(sellableInvType.getInvType());
         Optional<MarketOrder> costliestBuy = findCostliestBuyOrder(sellableInvType.getInvType());
         if (cheapestSell.isPresent() && costliestBuy.isPresent()) {
-            return new TradeDTO(cheapestSell.get(), costliestBuy.get(), userMarket);
+            return new TradeDTO(cheapestSell.get(), costliestBuy.get());
         }
         return null;
     }
@@ -208,45 +226,8 @@ public class MarketOrderService {
         return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(invType, SecurityUtils.getCurrentUserStation().getId());
     }
 
-    private Set<Long> getSellInvTypeInUserMarket() {
-        return getInvTypeInUserMarket(getInvTypeInUserMarket()
-            .filter(this::isValidSellOrderFromStation));
-    }
-
-    private Set<Long> getBuyInvTypeInUserMarket() {
-        return getInvTypeInUserMarket(getInvTypeInUserMarket()
-            .filter(this::isValidBuyOrderFromStation));
-    }
-
-    private Set<Long> getInvTypeInUserMarket(Stream<com.beimin.eveapi.model.shared.MarketOrder> marketOrders) {
-        return marketOrders
-            .mapToLong(com.beimin.eveapi.model.shared.MarketOrder::getTypeID)
-            .boxed()
-            .collect(Collectors.toSet());
-    }
-
-    private Stream<com.beimin.eveapi.model.shared.MarketOrder> getInvTypeInUserMarket() {
-        User user = userService.getUserWithAuthorities();
-        if (user.getKeyId() == null || StringUtils.isBlank(user.getVCode())) {
-            return Stream.empty();
-        }
-        try {
-            MarketOrdersParser parser = new MarketOrdersParser();
-            ApiAuthorization auth = new ApiAuthorization(user.getKeyId(), user.getVCode());
-            MarketOrdersResponse response = parser.getResponse(auth);
-            return response.getAll().stream();
-        } catch (ApiException e) {
-            log.error("Unable to retrieve user's market orders", e);
-        }
-        return Stream.empty();
-    }
-
-    private boolean isValidSellOrderFromStation(com.beimin.eveapi.model.shared.MarketOrder marketOrder) {
-        return SecurityUtils.getCurrentUserStation().getId() == marketOrder.getStationID() && marketOrder.getBid() == 0 && marketOrder.getOrderState() == 0;
-    }
-
-    private boolean isValidBuyOrderFromStation(com.beimin.eveapi.model.shared.MarketOrder marketOrder) {
-        return SecurityUtils.getCurrentUserStation().getId() == marketOrder.getStationID() && marketOrder.getBid() == 1 && marketOrder.getOrderState() == 0;
+    private boolean isValidMarketOrderFromStation(com.beimin.eveapi.model.shared.MarketOrder marketOrder) {
+        return SecurityUtils.getCurrentUserStation().getId() == marketOrder.getStationID() && marketOrder.getOrderState() == 0;
     }
 
     private boolean isSellableAndStationIsHub(JsonObject item) {

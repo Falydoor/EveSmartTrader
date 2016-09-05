@@ -5,6 +5,7 @@ import com.smarttrader.domain.enums.Station;
 import com.smarttrader.security.SecurityUtils;
 import com.smarttrader.service.MarketOrderService;
 import com.smarttrader.service.dto.TradeDTO;
+import com.smarttrader.web.rest.dto.UserMarketDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,9 @@ public class TradeRessource {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Transactional(readOnly = true)
-    public void changeStation(Station station) {
+    public ResponseEntity<UserMarketDTO> changeStation(Station station) {
         SecurityUtils.setCurrentUserStation(station);
+        return new ResponseEntity<>(marketOrderService.getInvTypeInUserMarket(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/hubTrades",
