@@ -1,16 +1,11 @@
 package com.smarttrader.service;
 
-import com.beimin.eveapi.exception.ApiException;
-import com.beimin.eveapi.parser.ApiAuthorization;
-import com.beimin.eveapi.parser.pilot.MarketOrdersParser;
-import com.beimin.eveapi.response.shared.MarketOrdersResponse;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.MarketOrder;
 import com.smarttrader.domain.SellableInvType;
-import com.smarttrader.domain.User;
 import com.smarttrader.domain.enums.Region;
 import com.smarttrader.domain.enums.SellableInvMarketGroup;
 import com.smarttrader.domain.enums.Station;
@@ -22,8 +17,6 @@ import com.smarttrader.repository.SellableInvTypeRepository;
 import com.smarttrader.repository.search.MarketOrderSearchRepository;
 import com.smarttrader.security.SecurityUtils;
 import com.smarttrader.service.dto.TradeDTO;
-import com.smarttrader.web.rest.dto.UserMarketDTO;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -67,9 +60,6 @@ public class MarketOrderService {
 
     @Inject
     private InvTypeRepository invTypeRepository;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private GsonBean gsonBean;
@@ -163,25 +153,6 @@ public class MarketOrderService {
             .collect(Collectors.toList());
     }
 
-    public UserMarketDTO getInvTypeInUserMarket() {
-        User user = userService.getUserWithAuthorities();
-        if (user.getKeyId() == null || StringUtils.isBlank(user.getVCode())) {
-            return new UserMarketDTO();
-        }
-        try {
-            MarketOrdersParser parser = new MarketOrdersParser();
-            ApiAuthorization auth = new ApiAuthorization(user.getKeyId(), user.getVCode());
-            MarketOrdersResponse response = parser.getResponse(auth);
-            Map<Integer, Set<Integer>> typeIDByBid = response.getAll().stream()
-                .filter(this::isValidMarketOrderFromStation)
-                .collect(Collectors.groupingBy(com.beimin.eveapi.model.shared.MarketOrder::getBid, Collectors.mapping(com.beimin.eveapi.model.shared.MarketOrder::getTypeID, Collectors.toSet())));
-            return new UserMarketDTO(typeIDByBid);
-        } catch (ApiException e) {
-            log.error("Unable to retrieve user's market orders", e);
-        }
-        return new UserMarketDTO();
-    }
-
     private List<TradeDTO> getTradesForAllStations(SellableInvType sellableInvType) {
         Map<Station, List<MarketOrder>> sellOrdersByStation = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType())
             .collect(Collectors.groupingBy(marketOrder -> Station.fromLong(marketOrder.getStationID()).get()));
@@ -224,10 +195,6 @@ public class MarketOrderService {
 
     private Optional<MarketOrder> findCostliestBuyOrder(InvType invType) {
         return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(invType, SecurityUtils.getCurrentUserStation().getId());
-    }
-
-    private boolean isValidMarketOrderFromStation(com.beimin.eveapi.model.shared.MarketOrder marketOrder) {
-        return SecurityUtils.getCurrentUserStation().getId() == marketOrder.getStationID() && marketOrder.getOrderState() == 0;
     }
 
     private boolean isSellableAndStationIsHub(JsonObject item) {

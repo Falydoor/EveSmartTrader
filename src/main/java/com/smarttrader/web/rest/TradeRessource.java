@@ -3,6 +3,7 @@ package com.smarttrader.web.rest;
 import com.codahale.metrics.annotation.Timed;
 import com.smarttrader.domain.enums.Station;
 import com.smarttrader.security.SecurityUtils;
+import com.smarttrader.service.EveApiService;
 import com.smarttrader.service.MarketOrderService;
 import com.smarttrader.service.dto.TradeDTO;
 import com.smarttrader.web.rest.dto.UserMarketDTO;
@@ -28,6 +29,9 @@ public class TradeRessource {
     @Inject
     private MarketOrderService marketOrderService;
 
+    @Inject
+    private EveApiService eveApiService;
+
     @RequestMapping(value = "/changeStation",
         method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE)
@@ -35,7 +39,7 @@ public class TradeRessource {
     @Transactional(readOnly = true)
     public ResponseEntity<UserMarketDTO> changeStation(Station station) {
         SecurityUtils.setCurrentUserStation(station);
-        return new ResponseEntity<>(marketOrderService.getInvTypeInUserMarket(), HttpStatus.OK);
+        return new ResponseEntity<>(eveApiService.getUserMarketOrders(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/hubTrades",
