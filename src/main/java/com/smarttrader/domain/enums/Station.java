@@ -15,28 +15,6 @@ public enum Station {
             .findFirst();
     }
 
-    public static Station getHubStationByRegion(Region region) {
-        if (region == Region.DOMAIN) {
-            return AmarrHUB;
-        }
-        if (region == Region.HEIMATAR) {
-            return RensHUB;
-        }
-        if (region == Region.METROPOLIS) {
-            return HekHUB;
-        }
-        if (region == Region.SINQ_LAISON) {
-            return DodixieHUB;
-        }
-        if (region == Region.LONETREK) {
-            return SobasekiHUB;
-        }
-        if (region == Region.THE_FORGE) {
-            return JitaHUB;
-        }
-        return null;
-    }
-
     private final long stationId;
 
     Station(long stationId) {
