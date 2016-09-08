@@ -36,6 +36,8 @@ public class TradeDTO {
 
     private Long typeId;
 
+    private Double thresholdPrice;
+
     public TradeDTO(SellableInvType sellableInvType) {
         setCommonFields(sellableInvType.getInvType());
         this.station = SecurityUtils.getCurrentUserStation();
@@ -50,20 +52,32 @@ public class TradeDTO {
     }
 
     public TradeDTO(List<MarketOrder> cheapestSell, Double cheapestBuy) {
+        sellPrice = cheapestBuy.longValue();
         Double cheapestSellPrice = cheapestSell.get(0).getPrice();
-        double thresholdPrice = Math.min(cheapestSellPrice * 1.1D, cheapestBuy);
+        thresholdPrice = Math.min(cheapestSellPrice * 1.1D, sellPrice);
         List<MarketOrder> sellables = cheapestSell.stream()
-            .filter(marketOrder -> marketOrder.getPrice() < thresholdPrice)
+            .filter(this::isSellable)
             .collect(Collectors.toList());
         setCommonFields(cheapestSell.get(0).getInvType());
-        totalPrice = Double.valueOf(sellables.stream().mapToDouble(value -> value.getPrice() * value.getVolume()).sum()).longValue();
-        totalProfit = Double.valueOf(sellables.stream().mapToDouble(value -> (cheapestBuy - value.getPrice()) * value.getVolume()).sum()).longValue();
+        totalPrice = Double.valueOf(sellables.stream().mapToDouble(this::getTotalPrice).sum()).longValue();
+        totalProfit = Double.valueOf(sellables.stream().mapToDouble(this::getTotalProfit).sum()).longValue();
         totalQuantity = sellables.stream().mapToLong(MarketOrder::getVolume).sum();
         totalVolume = Double.valueOf(totalQuantity * cheapestSell.get(0).getInvType().getVolume()).longValue();
-        sellPrice = cheapestBuy.longValue();
         percentProfit = 100 * totalProfit / totalPrice;
-        profit = Double.valueOf(cheapestBuy - cheapestSellPrice).longValue();
+        profit = Double.valueOf(sellPrice - cheapestSellPrice).longValue();
         this.station = Station.fromLong(cheapestSell.get(0).getStationID()).orElse(Station.JitaHUB);
+    }
+
+    private double getTotalProfit(MarketOrder value) {
+        return (sellPrice - value.getPrice()) * value.getVolume();
+    }
+
+    private double getTotalPrice(MarketOrder value) {
+        return value.getPrice() * value.getVolume();
+    }
+
+    private boolean isSellable(MarketOrder marketOrder) {
+        return marketOrder.getPrice() < thresholdPrice;
     }
 
     public Long getTypeId() {
