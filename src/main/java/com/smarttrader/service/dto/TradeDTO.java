@@ -40,7 +40,7 @@ public class TradeDTO {
 
     public TradeDTO(SellableInvType sellableInvType) {
         setCommonFields(sellableInvType.getInvType());
-        this.station = SecurityUtils.getCurrentUserStation();
+        this.station = SecurityUtils.getBuyStation();
         totalVolume = sellableInvType.getInvType().getVolume().longValue();
     }
 

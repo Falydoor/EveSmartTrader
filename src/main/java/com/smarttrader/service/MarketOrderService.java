@@ -156,7 +156,7 @@ public class MarketOrderService {
     private List<TradeDTO> getTradesForAllStations(SellableInvType sellableInvType) {
         Map<Station, List<MarketOrder>> sellOrdersByStation = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType())
             .collect(Collectors.groupingBy(marketOrder -> Station.fromLong(marketOrder.getStationID()).get()));
-        Double cheapestBuy = sellOrdersByStation.get(SecurityUtils.getCurrentUserStation()).get(0).getPrice();
+        Double cheapestBuy = sellOrdersByStation.get(SecurityUtils.getBuyStation()).get(0).getPrice();
 
         return Arrays.stream(Station.values())
             .filter(sellStation -> isCheapestThanBuyStation(sellOrdersByStation.get(sellStation), cheapestBuy))
@@ -169,7 +169,7 @@ public class MarketOrderService {
     }
 
     private boolean isPenury(SellableInvType sellableInvType) {
-        return marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(sellableInvType.getInvType(), SecurityUtils.getCurrentUserStation().getId()) == 0;
+        return marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(sellableInvType.getInvType(), SecurityUtils.getBuyStation().getId()) == 0;
     }
 
     private Stream<SellableInvType> findSellableWithoutSkill() {
@@ -190,11 +190,11 @@ public class MarketOrderService {
     }
 
     private Optional<MarketOrder> findCheapestSellOrder(InvType invType) {
-        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(invType, SecurityUtils.getCurrentUserStation().getId());
+        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(invType, SecurityUtils.getBuyStation().getId());
     }
 
     private Optional<MarketOrder> findCostliestBuyOrder(InvType invType) {
-        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(invType, SecurityUtils.getCurrentUserStation().getId());
+        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(invType, SecurityUtils.getBuyStation().getId());
     }
 
     private boolean isSellableAndStationIsHub(JsonObject item) {

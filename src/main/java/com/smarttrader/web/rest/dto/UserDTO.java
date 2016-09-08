@@ -78,7 +78,7 @@ public class UserDTO {
         this.keyId = keyId;
         this.vCode = vCode;
         this.stations = Station.values();
-        this.station = SecurityUtils.getCurrentUserStation();
+        this.station = SecurityUtils.getBuyStation();
     }
 
     public String getPassword() {

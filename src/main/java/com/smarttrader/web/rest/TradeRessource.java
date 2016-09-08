@@ -38,7 +38,7 @@ public class TradeRessource {
     @Timed
     @Transactional(readOnly = true)
     public ResponseEntity<UserMarketDTO> changeStation(Station station) {
-        SecurityUtils.setCurrentUserStation(station);
+        SecurityUtils.setBuyStation(station);
         return new ResponseEntity<>(eveApiService.getUserMarketOrders(), HttpStatus.OK);
     }
 

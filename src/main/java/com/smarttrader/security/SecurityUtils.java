@@ -76,7 +76,7 @@ public final class SecurityUtils {
         return false;
     }
 
-    public static Station getCurrentUserStation() {
+    public static Station getBuyStation() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
@@ -85,7 +85,7 @@ public final class SecurityUtils {
         return Station.JitaHUB;
     }
 
-    public static void setCurrentUserStation(Station station) {
+    public static void setBuyStation(Station station) {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
