@@ -54,7 +54,7 @@ public class TradeDTO {
     public TradeDTO(List<MarketOrder> cheapestSell, Double cheapestBuy) {
         sellPrice = cheapestBuy.longValue();
         Double cheapestSellPrice = cheapestSell.get(0).getPrice();
-        thresholdPrice = Math.min(cheapestSellPrice * 1.1D, sellPrice);
+        thresholdPrice = Math.min(cheapestSellPrice * 1.1D, cheapestBuy);
         List<MarketOrder> sellables = cheapestSell.stream()
             .filter(this::isSellable)
             .collect(Collectors.toList());
