@@ -16,6 +16,7 @@ import com.smarttrader.repository.MarketOrderRepository;
 import com.smarttrader.repository.SellableInvTypeRepository;
 import com.smarttrader.repository.search.MarketOrderSearchRepository;
 import com.smarttrader.security.SecurityUtils;
+import com.smarttrader.service.builder.TradeBuilder;
 import com.smarttrader.service.dto.TradeDTO;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -154,14 +154,10 @@ public class MarketOrderService {
     }
 
     private List<TradeDTO> getTradesForAllStations(SellableInvType sellableInvType) {
-        Map<Station, List<MarketOrder>> sellOrdersByStation = marketOrderRepository.findByInvTypeAndBuyFalseOrderByPrice(sellableInvType.getInvType())
-            .collect(Collectors.groupingBy(marketOrder -> Station.fromLong(marketOrder.getStationID()).get()));
-        Double cheapestBuy = sellOrdersByStation.get(SecurityUtils.getBuyStation()).get(0).getPrice();
-
+        TradeBuilder tradeBuilder = new TradeBuilder(marketOrderRepository, sellableInvType);
         return Arrays.stream(Station.values())
-            .filter(sellStation -> isCheapestThanBuyStation(sellOrdersByStation.get(sellStation), cheapestBuy))
-            .map(sellStation -> new TradeDTO(sellOrdersByStation.get(sellStation), cheapestBuy))
-            .collect(Collectors.toList());
+            .filter(tradeBuilder::isCheapestThanBuyStation)
+            .collect(Collectors.mapping(tradeBuilder::getTrade, Collectors.toList()));
     }
 
     private boolean isNotPenury(SellableInvType sellableInvType) {
@@ -209,7 +205,4 @@ public class MarketOrderService {
         return marketOrder;
     }
 
-    private boolean isCheapestThanBuyStation(List<MarketOrder> cheapestSell, Double cheapestBuy) {
-        return !CollectionUtils.isEmpty(cheapestSell) && cheapestSell.get(0).getPrice() < cheapestBuy;
-    }
 }
