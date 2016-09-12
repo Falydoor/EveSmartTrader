@@ -130,8 +130,13 @@ public class MarketOrderService {
     }
 
     public List<TradeDTO> buildHubTrades() {
-        return findSellableWithoutSkill()
+        List<InvType> sellableInvTypes = findSellableWithoutSkill()
             .filter(this::isNotPenury)
+            .collect(Collectors.toList());
+
+        return marketOrderRepository.findByInvTypeInAndBuyFalseOrderByPrice(sellableInvTypes)
+            .collect(Collectors.groupingBy(MarketOrder::getInvType))
+            .values().stream()
             .map(this::getTradesForAllStations)
             .flatMap(Collection::stream)
             .sorted((t1, t2) -> t2.getPercentProfit().compareTo(t1.getPercentProfit()))
@@ -140,6 +145,7 @@ public class MarketOrderService {
 
     public List<TradeDTO> buildPenuryTrades() {
         return sellableInvTypeRepository.findAll().stream()
+            .map(SellableInvType::getInvType)
             .filter(this::isPenury)
             .map(TradeDTO::new)
             .collect(Collectors.toList());
@@ -153,28 +159,28 @@ public class MarketOrderService {
             .collect(Collectors.toList());
     }
 
-    private List<TradeDTO> getTradesForAllStations(SellableInvType sellableInvType) {
-        TradeBuilder tradeBuilder = new TradeBuilder(marketOrderRepository, sellableInvType);
+    private List<TradeDTO> getTradesForAllStations(List<MarketOrder> marketOrders) {
+        TradeBuilder tradeBuilder = new TradeBuilder(marketOrders.stream());
         return Arrays.stream(Station.values())
             .filter(tradeBuilder::isCheapestThanBuyStation)
             .collect(Collectors.mapping(tradeBuilder::getTrade, Collectors.toList()));
     }
 
-    private boolean isNotPenury(SellableInvType sellableInvType) {
-        return !isPenury(sellableInvType);
+    private boolean isNotPenury(InvType invType) {
+        return !isPenury(invType);
     }
 
-    private boolean isPenury(SellableInvType sellableInvType) {
-        return marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(sellableInvType.getInvType(), SecurityUtils.getBuyStation().getId()) == 0;
+    private boolean isPenury(InvType invType) {
+        return marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(invType, SecurityUtils.getBuyStation().getId()) == 0;
     }
 
-    private Stream<SellableInvType> findSellableWithoutSkill() {
-        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(SellableInvMarketGroup.SKILLS.getId());
+    private Stream<InvType> findSellableWithoutSkill() {
+        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(SellableInvMarketGroup.SKILLS.getId()).map(SellableInvType::getInvType);
     }
 
-    private TradeDTO createStationTrade(SellableInvType sellableInvType) {
-        Optional<MarketOrder> cheapestSell = findCheapestSellOrder(sellableInvType.getInvType());
-        Optional<MarketOrder> costliestBuy = findCostliestBuyOrder(sellableInvType.getInvType());
+    private TradeDTO createStationTrade(InvType invType) {
+        Optional<MarketOrder> cheapestSell = findCheapestSellOrder(invType);
+        Optional<MarketOrder> costliestBuy = findCostliestBuyOrder(invType);
         if (cheapestSell.isPresent() && costliestBuy.isPresent()) {
             return new TradeDTO(cheapestSell.get(), costliestBuy.get());
         }
