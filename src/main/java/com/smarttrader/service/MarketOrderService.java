@@ -144,9 +144,7 @@ public class MarketOrderService {
     }
 
     public List<TradeDTO> buildPenuryTrades() {
-        return sellableInvTypeRepository.findAll().stream()
-            .map(SellableInvType::getInvType)
-            .filter(this::isPenury)
+        return sellableInvTypeRepository.findPenury(SecurityUtils.getBuyStation().getId())
             .map(TradeDTO::new)
             .collect(Collectors.toList());
     }

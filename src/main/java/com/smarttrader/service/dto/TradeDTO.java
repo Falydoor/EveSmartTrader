@@ -3,6 +3,7 @@ package com.smarttrader.service.dto;
 import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.MarketOrder;
 import com.smarttrader.domain.Referential;
+import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.enums.Station;
 import com.smarttrader.security.SecurityUtils;
 
@@ -37,10 +38,10 @@ public class TradeDTO {
 
     private Double thresholdPrice;
 
-    public TradeDTO(InvType invType) {
-        setCommonFields(invType);
+    public TradeDTO(SellableInvType sellableInvType) {
+        setCommonFields(sellableInvType.getInvType());
         this.station = SecurityUtils.getBuyStation();
-        totalVolume = invType.getVolume().longValue();
+        totalVolume = sellableInvType.getInvType().getVolume().longValue();
     }
 
     public TradeDTO(MarketOrder cheapest, MarketOrder costliest) {
