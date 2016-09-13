@@ -131,8 +131,8 @@ public class MarketOrderService {
     }
 
     public List<TradeDTO> buildHubTrades() {
-        Stream<BigInteger> invTypeNotPenury = sellableInvTypeRepository.findSellNotPenury(SecurityUtils.getBuyStation().getId(), Collections.singletonList(SellableInvMarketGroup.SKILLS.getId()));
-        return marketOrderRepository.findByInvTypeIdInAndBuyFalseOrderByPrice(invTypeNotPenury.map(BigInteger::longValue).collect(Collectors.toList()))
+        List<Long> idsNotPenury = getInvTypesNotPenury();
+        return Stream.concat(getSellOrders(idsNotPenury), getCheapestSellOrders(idsNotPenury))
             .collect(Collectors.groupingBy(MarketOrder::getInvType))
             .values().stream()
             .map(this::getTradesForAllStations)
@@ -153,6 +153,20 @@ public class MarketOrderService {
             .filter(this::isProfitable)
             .sorted((t1, t2) -> t2.getProfit().compareTo(t1.getProfit()))
             .collect(Collectors.toList());
+    }
+
+    private List<Long> getInvTypesNotPenury() {
+        return sellableInvTypeRepository.findSellNotPenury(SecurityUtils.getBuyStation().getId(), Collections.singletonList(SellableInvMarketGroup.SKILLS.getId()))
+            .map(BigInteger::longValue)
+            .collect(Collectors.toList());
+    }
+
+    private Stream<MarketOrder> getSellOrders(List<Long> idsNotPenury) {
+        return marketOrderRepository.findByInvTypeIdInAndStationIDNotAndBuyFalseOrderByPrice(idsNotPenury, SecurityUtils.getBuyStation().getId());
+    }
+
+    private Stream<MarketOrder> getCheapestSellOrders(List<Long> idsNotPenury) {
+        return marketOrderRepository.findCheapestSellOrder(idsNotPenury, SecurityUtils.getBuyStation().getId());
     }
 
     private List<TradeDTO> getTradesForAllStations(List<MarketOrder> marketOrders) {
