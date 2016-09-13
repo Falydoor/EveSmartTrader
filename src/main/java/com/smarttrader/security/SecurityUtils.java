@@ -85,6 +85,10 @@ public final class SecurityUtils {
         return Station.JitaHUB;
     }
 
+    public static Long getBuyId() {
+        return getBuyStation().getId();
+    }
+
     public static void setBuyStation(Station station) {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();

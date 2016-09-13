@@ -51,7 +51,7 @@ public class EveApiService {
     }
 
     private boolean isValidMarketOrderFromStation(MarketOrder marketOrder) {
-        return SecurityUtils.getBuyStation().getId() == marketOrder.getStationID() && marketOrder.getOrderState() == 0;
+        return SecurityUtils.getBuyId() == marketOrder.getStationID() && marketOrder.getOrderState() == 0;
     }
 
 }

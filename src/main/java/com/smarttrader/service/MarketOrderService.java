@@ -142,7 +142,7 @@ public class MarketOrderService {
     }
 
     public List<TradeDTO> buildPenuryTrades() {
-        return sellableInvTypeRepository.findSellPenury(SecurityUtils.getBuyStation().getId())
+        return sellableInvTypeRepository.findSellPenury(SecurityUtils.getBuyId())
             .map(TradeDTO::new)
             .collect(Collectors.toList());
     }
@@ -156,17 +156,17 @@ public class MarketOrderService {
     }
 
     private List<Long> getInvTypesNotPenury() {
-        return sellableInvTypeRepository.findSellNotPenury(SecurityUtils.getBuyStation().getId(), Collections.singletonList(SellableInvMarketGroup.SKILLS.getId()))
+        return sellableInvTypeRepository.findSellNotPenury(SecurityUtils.getBuyId(), Collections.singletonList(SellableInvMarketGroup.SKILLS.getId()))
             .map(BigInteger::longValue)
             .collect(Collectors.toList());
     }
 
     private Stream<MarketOrder> getSellOrders(List<Long> idsNotPenury) {
-        return marketOrderRepository.findByInvTypeIdInAndStationIDNotAndBuyFalseOrderByPrice(idsNotPenury, SecurityUtils.getBuyStation().getId());
+        return marketOrderRepository.findByInvTypeIdInAndStationIDNotAndBuyFalseOrderByPrice(idsNotPenury, SecurityUtils.getBuyId());
     }
 
     private Stream<MarketOrder> getCheapestSellOrders(List<Long> idsNotPenury) {
-        return marketOrderRepository.findCheapestSellOrder(idsNotPenury, SecurityUtils.getBuyStation().getId());
+        return marketOrderRepository.findCheapestSellOrder(idsNotPenury, SecurityUtils.getBuyId());
     }
 
     private List<TradeDTO> getTradesForAllStations(List<MarketOrder> marketOrders) {
@@ -194,11 +194,11 @@ public class MarketOrderService {
     }
 
     private Optional<MarketOrder> findCheapestSellOrder(InvType invType) {
-        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(invType, SecurityUtils.getBuyStation().getId());
+        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(invType, SecurityUtils.getBuyId());
     }
 
     private Optional<MarketOrder> findCostliestBuyOrder(InvType invType) {
-        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(invType, SecurityUtils.getBuyStation().getId());
+        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(invType, SecurityUtils.getBuyId());
     }
 
     private boolean isSellableAndStationIsHub(JsonObject item) {
