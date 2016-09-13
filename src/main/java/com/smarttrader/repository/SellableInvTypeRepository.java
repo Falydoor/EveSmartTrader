@@ -14,6 +14,6 @@ public interface SellableInvTypeRepository extends JpaRepository<SellableInvType
 
     Stream<SellableInvType> findByInvTypeInvMarketGroupParentGroupIDNot(Long parentGroupID);
 
-    @Query(value = "SELECT * FROM sellable_inv_type WHERE inv_type_id NOT IN (SELECT inv_type_id FROM market_order WHERE buy = FALSE AND station_id = :station)", nativeQuery = true)
+    @Query(value = "SELECT * FROM sellable_inv_type WHERE inv_type_id NOT IN (SELECT DISTINCT inv_type_id FROM market_order WHERE buy = FALSE AND station_id = :station)", nativeQuery = true)
     Stream<SellableInvType> findPenury(@Param("station") Long station);
 }
