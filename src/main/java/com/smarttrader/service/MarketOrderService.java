@@ -3,7 +3,6 @@ package com.smarttrader.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.smarttrader.domain.InvType;
 import com.smarttrader.domain.MarketOrder;
 import com.smarttrader.domain.SellableInvType;
 import com.smarttrader.domain.enums.Region;
@@ -148,9 +147,12 @@ public class MarketOrderService {
     }
 
     public List<TradeDTO> buildStationTrades() {
-        return findSellableWithoutSkill()
-            .map(this::createStationTrade)
-            .filter(this::isProfitable)
+        List<Long> idsSellable = findSellableWithoutSkill();
+        return Stream.concat(getCheapestSellOrders(idsSellable), getCostliestBuyOrders(idsSellable))
+            .collect(Collectors.groupingBy(MarketOrder::getInvType))
+            .values().stream()
+            .map(TradeDTO::new)
+            .filter(TradeDTO::getProfitable)
             .sorted((t1, t2) -> t2.getProfit().compareTo(t1.getProfit()))
             .collect(Collectors.toList());
     }
@@ -165,8 +167,12 @@ public class MarketOrderService {
         return marketOrderRepository.findByInvTypeIdInAndStationIDNotAndBuyFalseOrderByPrice(idsNotPenury, SecurityUtils.getBuyId());
     }
 
-    private Stream<MarketOrder> getCheapestSellOrders(List<Long> idsNotPenury) {
-        return marketOrderRepository.findCheapestSellOrder(idsNotPenury, SecurityUtils.getBuyId());
+    private Stream<MarketOrder> getCostliestBuyOrders(List<Long> invTypes) {
+        return marketOrderRepository.findCostliestBuyOrder(invTypes, SecurityUtils.getBuyId());
+    }
+
+    private Stream<MarketOrder> getCheapestSellOrders(List<Long> invTypes) {
+        return marketOrderRepository.findCheapestSellOrder(invTypes, SecurityUtils.getBuyId());
     }
 
     private List<TradeDTO> getTradesForAllStations(List<MarketOrder> marketOrders) {
@@ -176,29 +182,10 @@ public class MarketOrderService {
             .collect(Collectors.mapping(tradeBuilder::getTrade, Collectors.toList()));
     }
 
-    private Stream<InvType> findSellableWithoutSkill() {
-        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(SellableInvMarketGroup.SKILLS.getId()).map(SellableInvType::getInvType);
-    }
-
-    private TradeDTO createStationTrade(InvType invType) {
-        Optional<MarketOrder> cheapestSell = findCheapestSellOrder(invType);
-        Optional<MarketOrder> costliestBuy = findCostliestBuyOrder(invType);
-        if (cheapestSell.isPresent() && costliestBuy.isPresent()) {
-            return new TradeDTO(cheapestSell.get(), costliestBuy.get());
-        }
-        return null;
-    }
-
-    private boolean isProfitable(TradeDTO trade) {
-        return trade != null && trade.getPercentProfit() >= 10;
-    }
-
-    private Optional<MarketOrder> findCheapestSellOrder(InvType invType) {
-        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyFalseOrderByPrice(invType, SecurityUtils.getBuyId());
-    }
-
-    private Optional<MarketOrder> findCostliestBuyOrder(InvType invType) {
-        return marketOrderRepository.findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(invType, SecurityUtils.getBuyId());
+    private List<Long> findSellableWithoutSkill() {
+        return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(SellableInvMarketGroup.SKILLS.getId())
+            .map(sellableInvType -> sellableInvType.getInvType().getId())
+            .collect(Collectors.toList());
     }
 
     private boolean isSellableAndStationIsHub(JsonObject item) {

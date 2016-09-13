@@ -38,17 +38,24 @@ public class TradeDTO {
 
     private Double thresholdPrice;
 
+    private Boolean profitable;
+
     public TradeDTO(SellableInvType sellableInvType) {
         setCommonFields(sellableInvType.getInvType());
         this.station = SecurityUtils.getBuyStation();
         totalVolume = sellableInvType.getInvType().getVolume().longValue();
     }
 
-    public TradeDTO(MarketOrder cheapest, MarketOrder costliest) {
-        setCommonFields(cheapest.getInvType());
-        profit = Double.valueOf(cheapest.getPrice() - costliest.getPrice()).longValue();
-        sellPrice = costliest.getPrice().longValue();
+    public TradeDTO(List<MarketOrder> marketOrders) {
+        profitable = false;
+        if (marketOrders.size() < 2) {
+            return;
+        }
+        setCommonFields(marketOrders.get(1).getInvType());
+        profit = Double.valueOf(marketOrders.get(0).getPrice() - marketOrders.get(1).getPrice()).longValue();
+        sellPrice = marketOrders.get(0).getPrice().longValue();
         percentProfit = 100 * profit / sellPrice;
+        profitable = percentProfit > 10;
     }
 
     public TradeDTO(List<MarketOrder> cheapestSell, Double cheapestBuy) {
@@ -166,6 +173,14 @@ public class TradeDTO {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public Boolean getProfitable() {
+        return profitable;
+    }
+
+    public void setProfitable(Boolean profitable) {
+        this.profitable = profitable;
     }
 
     @Override
