@@ -18,5 +18,5 @@ public interface MarketOrderRepository extends JpaRepository<MarketOrder, Long> 
 
     Optional<MarketOrder> findFirstByInvTypeAndStationIDAndBuyTrueOrderByPriceDesc(InvType invType, Long stationID);
 
-    Stream<MarketOrder> findByInvTypeInAndBuyFalseOrderByPrice(List<InvType> invTypes);
+    Stream<MarketOrder> findByInvTypeIdInAndBuyFalseOrderByPrice(List<Long> invTypes);
 }

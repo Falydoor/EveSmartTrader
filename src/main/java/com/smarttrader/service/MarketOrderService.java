@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -130,11 +131,8 @@ public class MarketOrderService {
     }
 
     public List<TradeDTO> buildHubTrades() {
-        List<InvType> sellableInvTypes = findSellableWithoutSkill()
-            .filter(this::isNotPenury)
-            .collect(Collectors.toList());
-
-        return marketOrderRepository.findByInvTypeInAndBuyFalseOrderByPrice(sellableInvTypes)
+        Stream<BigInteger> invTypeNotPenury = sellableInvTypeRepository.findSellNotPenury(SecurityUtils.getBuyStation().getId(), Collections.singletonList(SellableInvMarketGroup.SKILLS.getId()));
+        return marketOrderRepository.findByInvTypeIdInAndBuyFalseOrderByPrice(invTypeNotPenury.map(BigInteger::longValue).collect(Collectors.toList()))
             .collect(Collectors.groupingBy(MarketOrder::getInvType))
             .values().stream()
             .map(this::getTradesForAllStations)
@@ -162,14 +160,6 @@ public class MarketOrderService {
         return Arrays.stream(Station.values())
             .filter(tradeBuilder::isCheapestThanBuyStation)
             .collect(Collectors.mapping(tradeBuilder::getTrade, Collectors.toList()));
-    }
-
-    private boolean isNotPenury(InvType invType) {
-        return !isPenury(invType);
-    }
-
-    private boolean isPenury(InvType invType) {
-        return marketOrderRepository.countByInvTypeAndStationIDAndBuyFalse(invType, SecurityUtils.getBuyStation().getId()) == 0;
     }
 
     private Stream<InvType> findSellableWithoutSkill() {
