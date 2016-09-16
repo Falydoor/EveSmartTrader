@@ -130,10 +130,7 @@ public class MarketOrderService {
     }
 
     public List<TradeDTO> buildHubTrades() {
-        List<Long> idsNotPenury = getInvTypesNotPenury();
-        return Stream.concat(getSellOrders(idsNotPenury), getCheapestSellOrders(idsNotPenury))
-            .collect(Collectors.groupingBy(MarketOrder::getInvType))
-            .values().stream()
+        return getCheapestSellOrders(getInvTypesNotPenury())
             .map(this::getTradesForAllStations)
             .flatMap(Collection::stream)
             .sorted((t1, t2) -> t2.getPercentProfit().compareTo(t1.getPercentProfit()))
@@ -163,10 +160,6 @@ public class MarketOrderService {
             .collect(Collectors.toList());
     }
 
-    private Stream<MarketOrder> getSellOrders(List<Long> idsNotPenury) {
-        return marketOrderRepository.findByInvTypeIdInAndStationIDNotAndBuyFalseOrderByPrice(idsNotPenury, SecurityUtils.getBuyId());
-    }
-
     private Stream<MarketOrder> getCostliestBuyOrders(List<Long> invTypes) {
         return marketOrderRepository.findCostliestBuyOrder(invTypes, SecurityUtils.getBuyId());
     }
@@ -175,11 +168,15 @@ public class MarketOrderService {
         return marketOrderRepository.findCheapestSellOrder(invTypes, SecurityUtils.getBuyId());
     }
 
-    private List<TradeDTO> getTradesForAllStations(List<MarketOrder> marketOrders) {
-        TradeBuilder tradeBuilder = new TradeBuilder(marketOrders.stream());
+    private List<TradeDTO> getTradesForAllStations(MarketOrder buyMarketOrder) {
+        TradeBuilder tradeBuilder = new TradeBuilder(buyMarketOrder, findSellOrdersLessThanBuyStation(buyMarketOrder));
         return Arrays.stream(Station.values())
             .filter(tradeBuilder::isCheapestThanBuyStation)
             .collect(Collectors.mapping(tradeBuilder::getTrade, Collectors.toList()));
+    }
+
+    private Stream<MarketOrder> findSellOrdersLessThanBuyStation(MarketOrder buyMarketOrder) {
+        return marketOrderRepository.findByInvTypeAndStationIDNotAndPriceLessThanAndBuyFalseOrderByPrice(buyMarketOrder.getInvType(), buyMarketOrder.getStationID(), buyMarketOrder.getPrice());
     }
 
     private List<Long> findSellableWithoutSkill() {

@@ -2,7 +2,6 @@ package com.smarttrader.service.builder;
 
 import com.smarttrader.domain.MarketOrder;
 import com.smarttrader.domain.enums.Station;
-import com.smarttrader.security.SecurityUtils;
 import com.smarttrader.service.dto.TradeDTO;
 import org.springframework.util.CollectionUtils;
 
@@ -19,9 +18,9 @@ public class TradeBuilder {
     private final Map<Station, List<MarketOrder>> sellOrdersByStation;
     private final Double cheapestBuy;
 
-    public TradeBuilder(Stream<MarketOrder> marketOrders) {
-        sellOrdersByStation = marketOrders.collect(Collectors.groupingBy(marketOrder -> Station.fromLong(marketOrder.getStationID()).get()));
-        cheapestBuy = sellOrdersByStation.get(SecurityUtils.getBuyStation()).get(0).getPrice();
+    public TradeBuilder(MarketOrder buyMarketOrder, Stream<MarketOrder> sellMarketOrders) {
+        sellOrdersByStation = sellMarketOrders.collect(Collectors.groupingBy(marketOrder -> Station.fromLong(marketOrder.getStationID()).get()));
+        cheapestBuy = buyMarketOrder.getPrice();
     }
 
     public TradeDTO getTrade(Station station) {
