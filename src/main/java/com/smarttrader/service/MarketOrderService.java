@@ -170,9 +170,7 @@ public class MarketOrderService {
 
     private List<TradeDTO> getTradesForAllStations(MarketOrder buyMarketOrder) {
         TradeBuilder tradeBuilder = new TradeBuilder(buyMarketOrder, findSellOrdersLessThanBuyStation(buyMarketOrder));
-        return Arrays.stream(Station.values())
-            .filter(tradeBuilder::isCheapestThanBuyStation)
-            .collect(Collectors.mapping(tradeBuilder::getTrade, Collectors.toList()));
+        return tradeBuilder.buildTrades();
     }
 
     private Stream<MarketOrder> findSellOrdersLessThanBuyStation(MarketOrder buyMarketOrder) {

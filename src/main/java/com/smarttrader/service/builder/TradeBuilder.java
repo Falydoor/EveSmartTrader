@@ -5,6 +5,7 @@ import com.smarttrader.domain.enums.Station;
 import com.smarttrader.service.dto.TradeDTO;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,20 +16,27 @@ import java.util.stream.Stream;
  */
 public class TradeBuilder {
 
-    private final Map<Station, List<MarketOrder>> sellOrdersByStation;
+    private final Map<Long, List<MarketOrder>> sellOrdersByStation;
     private final Double cheapestBuy;
 
     public TradeBuilder(MarketOrder buyMarketOrder, Stream<MarketOrder> sellMarketOrders) {
-        sellOrdersByStation = sellMarketOrders.collect(Collectors.groupingBy(marketOrder -> Station.fromLong(marketOrder.getStationID()).get()));
+        sellOrdersByStation = sellMarketOrders.collect(Collectors.groupingBy(MarketOrder::getStationID));
         cheapestBuy = buyMarketOrder.getPrice();
     }
 
-    public TradeDTO getTrade(Station station) {
-        return new TradeDTO(sellOrdersByStation.get(station), cheapestBuy);
+    public List<TradeDTO> buildTrades() {
+        return Arrays.stream(Station.values())
+            .map(Station::getId)
+            .filter(this::isCheapestThanBuyStation)
+            .collect(Collectors.mapping(this::getTrade, Collectors.toList()));
     }
 
-    public boolean isCheapestThanBuyStation(Station station) {
-        return !CollectionUtils.isEmpty(sellOrdersByStation.get(station)) && sellOrdersByStation.get(station).get(0).getPrice() < cheapestBuy;
+    private TradeDTO getTrade(Long stationId) {
+        return new TradeDTO(sellOrdersByStation.get(stationId), cheapestBuy);
+    }
+
+    private boolean isCheapestThanBuyStation(Long stationId) {
+        return !CollectionUtils.isEmpty(sellOrdersByStation.get(stationId)) && sellOrdersByStation.get(stationId).get(0).getPrice() < cheapestBuy;
     }
 
 }
