@@ -116,8 +116,7 @@ public class MarketOrderService {
             marketOrders.addAll(StreamSupport.stream(items.spliterator(), false)
                 .map(JsonElement::getAsJsonObject)
                 .filter(this::isSellableAndStationIsHub)
-                .map(this::createMarketOrder)
-                .collect(Collectors.toList()));
+                .collect(Collectors.mapping(this::createMarketOrder, Collectors.toList())));
             log.info("Market orders {}'s pages : {}/{}", region, page, json.get("pageCount").getAsInt());
 
             // Retrieve next page
@@ -139,8 +138,7 @@ public class MarketOrderService {
 
     public List<TradeDTO> buildPenuryTrades() {
         return sellableInvTypeRepository.findSellPenury(SecurityUtils.getBuyId())
-            .map(TradeDTO::new)
-            .collect(Collectors.toList());
+            .collect(Collectors.mapping(TradeDTO::new, Collectors.toList()));
     }
 
     public List<TradeDTO> buildStationTrades() {
@@ -156,8 +154,7 @@ public class MarketOrderService {
 
     private List<Long> getInvTypesNotPenury() {
         return sellableInvTypeRepository.findSellNotPenury(SecurityUtils.getBuyId(), Collections.singletonList(SellableInvMarketGroup.SKILLS.getId()))
-            .map(BigInteger::longValue)
-            .collect(Collectors.toList());
+            .collect(Collectors.mapping(BigInteger::longValue, Collectors.toList()));
     }
 
     private Stream<MarketOrder> getCostliestBuyOrders(List<Long> invTypes) {
@@ -179,8 +176,7 @@ public class MarketOrderService {
 
     private List<Long> findSellableWithoutSkill() {
         return sellableInvTypeRepository.findByInvTypeInvMarketGroupParentGroupIDNot(SellableInvMarketGroup.SKILLS.getId())
-            .map(sellableInvType -> sellableInvType.getInvType().getId())
-            .collect(Collectors.toList());
+            .collect(Collectors.mapping(sellableInvType -> sellableInvType.getInvType().getId(), Collectors.toList()));
     }
 
     private boolean isSellableAndStationIsHub(JsonObject item) {

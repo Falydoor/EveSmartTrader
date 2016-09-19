@@ -21,6 +21,6 @@ public enum SellableInvMarketGroup {
     }
 
     public static List<Long> getIds() {
-        return Arrays.stream(values()).map(SellableInvMarketGroup::getId).collect(Collectors.toList());
+        return Arrays.stream(values()).collect(Collectors.mapping(SellableInvMarketGroup::getId, Collectors.toList()));
     }
 }
