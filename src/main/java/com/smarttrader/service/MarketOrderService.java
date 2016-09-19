@@ -104,6 +104,9 @@ public class MarketOrderService {
     }
 
     private void retrieveMarketOrders(Region region, String url, int page) {
+        if (page == 1) {
+            log.info("Retrieving market orders {}", region);
+        }
         try {
             HttpGet request = new HttpGet(url);
             CloseableHttpResponse response = client.execute(request);
