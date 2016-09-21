@@ -43,7 +43,7 @@
                         ascending: PaginationUtil.parseAscending($stateParams.sort),
                         search: $stateParams.search
                     };
-                }],
+                }]
             }
         })
         .state('inv-type-detail', {
