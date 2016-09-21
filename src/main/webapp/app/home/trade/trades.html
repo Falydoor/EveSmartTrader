@@ -94,7 +94,7 @@
         {{vm.showHubTrades ? '' : '(hided)'}}
     </h2>
     Seller Station
-    <select ng-options="station for station in vm.stations track by station" ng-model="vm.sellerStation"></select>
+    <select ng-options="station for station in vm.sellerStations track by station" ng-model="vm.sellerStation"></select>
     <table ng-show="vm.showHubTrades" class="table table-hover">
         <thead>
         <tr>

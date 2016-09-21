@@ -11,7 +11,6 @@
         var vm = this;
         vm.stations = identity.stations;
         vm.station = identity.station;
-        vm.sellerStation = vm.stations[0];
         vm.showHubTrades = true;
         vm.showPenuryTrades = false;
         vm.showStationTrades = false;
@@ -44,6 +43,9 @@
         }
 
         function changeStation() {
+            vm.sellerStations = angular.copy(vm.stations);
+            vm.sellerStations.splice(vm.sellerStations.indexOf(vm.station), 1);
+            vm.sellerStation = vm.sellerStations[0];
             Trade.changeStation({station: vm.station}, function (marketOrders) {
                 vm.marketOrders = marketOrders;
                 vm.loadTrades();
