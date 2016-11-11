@@ -148,7 +148,7 @@ public class SellableInvTypeService {
                 sellableInvType.setInvType(invType);
                 sellableInvTypes.add(sellableInvType);
             }
-            double tempPercent = Math.floor(100 * doneNumber.incrementAndGet() / marketableInvTypes.size());
+            int tempPercent = Double.valueOf(100 * doneNumber.incrementAndGet() / marketableInvTypes.size()).intValue();
             if (tempPercent != percent && tempPercent % 5 == 0) {
                 percent = tempPercent;
                 log.info("Sellable progress : {}%", percent);
