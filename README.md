@@ -1,5 +1,15 @@
 # EveSmartTrader
 
+A web application for the game EVE Online that shows you a list of trades you can do in the in-game market.
+
+There is three kind of trades you can do :
+
+* Hub trade : a trade between two stations of two different system. This trade is based on the sell order's price of both station.
+
+* Station trade : a trade in one station, this trade is based on the price of the buy order's and the sell order's price.
+
+* Penury trade : a trade when there is no sell order.
+
 This application was generated using JHipster, you can find documentation and help at [https://jhipster.github.io](https://jhipster.github.io).
 
 ## Prerequisites
