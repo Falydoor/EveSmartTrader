@@ -53,7 +53,7 @@ jhipster:
     security:
         rememberMe:
             # security key (this key should be unique for your application, and kept secret)
-            key:
+            key: myKey
     swagger:
         title: EveSmartTrader API
         description: EveSmartTrader API documentation

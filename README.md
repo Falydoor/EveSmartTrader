@@ -2,6 +2,28 @@
 
 This application was generated using JHipster, you can find documentation and help at [https://jhipster.github.io](https://jhipster.github.io).
 
+## Prerequisites
+
+### Database
+
+PostgreSQL must be installed and a database "EveSmartTrader" must be created.
+
+### Configuration
+
+Rename all the .yml files in src/main/resources/config/ by removing "-sample"
+
+##### application.yml
+
+Generate a key and replace "myKey" with it in jhipster.security.rememberMe.key
+
+##### application-dev.yml
+
+Configure your datasource credentials in spring.datasource
+
+##### application-prod.yml
+
+Configure your datasource credentials in spring.datasource
+
 ## Development
 
 Before you can build this project, you must install and configure the following dependencies on your machine:
@@ -43,36 +65,3 @@ To ensure everything worked, run:
     java -jar target/*.war --spring.profiles.active=prod
 
 Then navigate to [http://localhost:8080](http://localhost:8080) in your browser.
-
-## Testing
-
-Unit tests are run by [Karma][] and written with [Jasmine][]. They're located in `src/test/javascript/` and can be run with:
-
-    gulp test
-
-
-
-## Continuous Integration
-
-To setup this project in Jenkins, use the following configuration:
-
-* Project name: `EveSmartTrader`
-* Source Code Management
-    * Git Repository: `git@github.com:xxxx/EveSmartTrader.git`
-    * Branches to build: `*/master`
-    * Additional Behaviours: `Wipe out repository & force clone`
-* Build Triggers
-    * Poll SCM / Schedule: `H/5 * * * *`
-* Build
-    * Invoke Maven / Tasks: `-Pprod clean package`
-* Post-build Actions
-    * Publish JUnit test result report / Test Report XMLs: `build/test-results/*.xml`
-
-[JHipster]: https://jhipster.github.io/
-[Node.js]: https://nodejs.org/
-[Bower]: http://bower.io/
-[Gulp]: http://gulpjs.com/
-[BrowserSync]: http://www.browsersync.io/
-[Karma]: http://karma-runner.github.io/
-[Jasmine]: http://jasmine.github.io/2.0/introduction.html
-[Protractor]: https://angular.github.io/protractor/
