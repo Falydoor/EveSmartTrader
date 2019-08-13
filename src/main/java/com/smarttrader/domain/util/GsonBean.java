@@ -2,7 +2,7 @@ package com.smarttrader.domain.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,8 +17,8 @@ public class GsonBean {
         gson = new GsonBuilder().create();
     }
 
-    public JsonObject parse(String json) {
-        return gson.fromJson(json, JsonObject.class);
+    public JsonArray parse(String json) {
+        return gson.fromJson(json, JsonArray.class);
     }
 
 }

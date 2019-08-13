@@ -96,9 +96,13 @@ public class MarketOrderService {
             log.error("Retrieving market orders took too much time", e);
         }
 
-        marketOrders = marketOrderRepository.save(marketOrders);
-        marketOrderRepository.flush();
-        marketOrderSearchRepository.save(marketOrders);
+        // Save market orders
+        if (!marketOrders.isEmpty()) {
+            marketOrders = marketOrderRepository.save(marketOrders);
+            marketOrderRepository.flush();
+            marketOrderSearchRepository.save(marketOrders);
+        }
+
         stopWatch.stop();
         log.info("Retrieved market orders in {}ms", stopWatch.getTime());
     }
@@ -112,20 +116,20 @@ public class MarketOrderService {
             CloseableHttpResponse response = client.execute(request);
 
             // Parse json
-            JsonObject json = gsonBean.parse(EntityUtils.toString(response.getEntity()));
-            JsonArray items = json.getAsJsonArray("items");
-
-            // Save all market orders that are sellable
-            marketOrders.addAll(StreamSupport.stream(items.spliterator(), false)
-                .map(JsonElement::getAsJsonObject)
-                .filter(this::isSellableAndStationIsHub)
-                .collect(Collectors.mapping(this::createMarketOrder, Collectors.toList())));
-            log.info("Market orders {}'s pages : {}/{}", region, page, json.get("pageCount").getAsInt());
-
-            // Retrieve next page
-            if (json.has("next")) {
-                retrieveMarketOrders(region, json.get("next").getAsJsonObject().get("href").getAsString(), ++page);
-            }
+//            JsonObject json = gsonBean.parse(EntityUtils.toString(response.getEntity()));
+//            JsonArray items = json.getAsJsonArray("items");
+//
+//            // Save all market orders that are sellable
+//            marketOrders.addAll(StreamSupport.stream(items.spliterator(), false)
+//                .map(JsonElement::getAsJsonObject)
+//                .filter(this::isSellableAndStationIsHub)
+//                .collect(Collectors.mapping(this::createMarketOrder, Collectors.toList())));
+//            log.info("Market orders {}'s pages : {}/{}", region, page, json.get("pageCount").getAsInt());
+//
+//            // Retrieve next page
+//            if (json.has("next")) {
+//                retrieveMarketOrders(region, json.get("next").getAsJsonObject().get("href").getAsString(), ++page);
+//            }
         } catch (IOException e) {
             log.error("Error getting market orders from URL", e);
         }

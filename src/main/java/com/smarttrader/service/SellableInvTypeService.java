@@ -118,10 +118,14 @@ public class SellableInvTypeService {
             log.error("Retrieving sellable inv type took too much time", e);
         }
 
-        log.info("Saving sellable inv type");
-        sellableInvTypes = sellableInvTypeRepository.save(sellableInvTypes);
-        sellableInvTypeRepository.flush();
-        sellableInvTypeSearchRepository.save(sellableInvTypes);
+        // Save sellable
+        if (!sellableInvTypes.isEmpty()) {
+            log.info("Saving sellable inv type");
+            sellableInvTypes = sellableInvTypeRepository.save(sellableInvTypes);
+            sellableInvTypeRepository.flush();
+            sellableInvTypeSearchRepository.save(sellableInvTypes);
+        }
+
         stopWatch.stop();
         log.info("Retrieved sellable inv type in {}ms", stopWatch.getTime());
     }
@@ -133,8 +137,8 @@ public class SellableInvTypeService {
             CloseableHttpResponse response = client.execute(request);
 
             // Parse json
-            JsonObject json = gsonBean.parse(EntityUtils.toString(response.getEntity()));
-            JsonArray items = json.getAsJsonArray("items");
+            JsonArray items = gsonBean.parse(EntityUtils.toString(response.getEntity()));
+            log.info("JSON => {}", items);
 
             // Test history from last month. An item is sellable if 15 history day match the isHistorySellable function
             Boolean isSellable = StreamSupport.stream(items.spliterator(), false)
@@ -165,7 +169,7 @@ public class SellableInvTypeService {
 
     private boolean isHistorySellable(JsonObject history) {
         int volume = history.get("volume").getAsInt();
-        double highPrice = history.get("highPrice").getAsDouble();
+        double highPrice = history.get("highest").getAsDouble();
 
         // Inv type with a small volume and high price
         if (volume >= 50 && highPrice >= 2000000) {
